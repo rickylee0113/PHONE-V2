@@ -208,6 +208,23 @@ export const StatsOverlay: React.FC<StatsOverlayProps> = ({
                 strokeWidth="2" 
             />
 
+            {/* FRONT ZONE (3m area) - Slightly Darker for visualization */}
+            {isPortrait ? (
+                <>
+                    {/* Top Front Zone */}
+                    <rect x="0" y="66.6" width="100" height="33.3" fill="#F1F5F9" stroke="none" />
+                    {/* Bottom Front Zone */}
+                    <rect x="0" y="100" width="100" height="33.3" fill="#F1F5F9" stroke="none" />
+                </>
+            ) : (
+                <>
+                    {/* Left Front Zone */}
+                    <rect x="66.6" y="0" width="33.3" height="100" fill="#F1F5F9" stroke="none" />
+                    {/* Right Front Zone */}
+                    <rect x="100" y="0" width="33.3" height="100" fill="#F1F5F9" stroke="none" />
+                </>
+            )}
+
             {/* Net Line (Center) */}
             {isPortrait ? (
                 <line x1="0" y1="100" x2="100" y2="100" stroke="black" strokeWidth="3" />
@@ -215,7 +232,7 @@ export const StatsOverlay: React.FC<StatsOverlayProps> = ({
                 <line x1="100" y1="0" x2="100" y2="100" stroke="black" strokeWidth="3" />
             )}
 
-            {/* 3m Lines */}
+            {/* 3m Lines (Over the fill) */}
             {isPortrait ? (
                 <>
                     <line x1="0" y1="66.6" x2="100" y2="66.6" stroke="black" strokeWidth="1" opacity="0.3" />

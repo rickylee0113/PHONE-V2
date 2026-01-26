@@ -657,7 +657,7 @@ export const GameView: React.FC<GameViewProps> = ({
                   {/* 2. Team Name (Next to Score) */}
                   <div className="flex flex-col items-start min-w-0 flex-1 overflow-hidden">
                       <div className="flex items-center gap-1 w-full">
-                           <span className={`text-2xl font-black truncate ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
+                           <span className={`text-2xl font-black truncate ${servingTeam === 'op' ? 'text-red-500' : 'text-red-300'}`}>{teamConfig.opName}</span>
                            <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
                       </div>
                   </div>

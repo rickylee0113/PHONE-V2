@@ -179,16 +179,22 @@ export const Court: React.FC<CourtProps> = ({
                 </marker>
             </defs>
 
-            {/* 1. COURT FLOOR */}
+            {/* 1. COURT FLOOR (Back Zone Color) */}
             <rect x="0" y="0" width="18" height="9" fill="#EA580C" stroke="none" />
             
-            {/* 2. LINES */}
+            {/* 2. FRONT ZONES (3m Line Area - Darker) */}
+            {/* Left Front Zone (My Team) */}
+            <rect x="6" y="0" width="3" height="9" fill="#C2410C" stroke="none" />
+            {/* Right Front Zone (Op Team) */}
+            <rect x="9" y="0" width="3" height="9" fill="#C2410C" stroke="none" />
+
+            {/* 3. LINES */}
             <rect x="0" y="0" width="18" height="9" fill="none" stroke="white" strokeWidth="0.1" />
             <line x1="9" y1="-2" x2="9" y2="11" stroke="white" strokeWidth="0.1" />
             <line x1="6" y1="0" x2="6" y2="9" stroke="white" strokeWidth="0.1" />
             <line x1="12" y1="0" x2="12" y2="9" stroke="white" strokeWidth="0.1" />
 
-            {/* 3. WATERMARKS */}
+            {/* 4. WATERMARKS */}
             {[1,2,3,4,5,6].map(p => {
                 const pos = p as Position;
                 const {x, y} = getPositionCenter('me', pos, true);
@@ -210,7 +216,7 @@ export const Court: React.FC<CourtProps> = ({
                 );
             })}
 
-            {/* 4. INTERACTIVE TRAJECTORY SYSTEM */}
+            {/* 5. INTERACTIVE TRAJECTORY SYSTEM */}
             {startPos && endPos && (
                 <line 
                     x1={startPos.x} y1={startPos.y}

@@ -191,7 +191,7 @@ export const SetupView: React.FC<SetupViewProps> = ({
                 type="text" 
                 value={opName}
                 onChange={(e) => setOpName(e.target.value)}
-                className="w-full bg-white border border-gray-300 text-center py-2 rounded-lg text-black focus:border-accent focus:outline-none placeholder-gray-400 font-bold shadow-sm"
+                className="w-full bg-white border border-gray-300 text-center py-2 rounded-lg text-red-600 focus:border-red-600 focus:outline-none placeholder-red-300 font-bold shadow-sm"
                 placeholder="輸入對手球隊"
             />
           </div>
@@ -207,7 +207,7 @@ export const SetupView: React.FC<SetupViewProps> = ({
              <div className="grid grid-cols-3 gap-2">
                  {[2, 3, 4].map(pos => renderInput(false, pos))}
              </div>
-             <div className="text-[10px] text-red-400 text-center mt-1 font-bold">前排 (Front / Net)</div>
+             <div className="text-[10px] text-red-500 text-center mt-1 font-bold">前排 (Front / Net)</div>
           </div>
           
            {/* Libero Input */}
