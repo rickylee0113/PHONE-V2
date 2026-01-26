@@ -1,0 +1,5 @@
+{
+  "name": "PHONE-V2",
+  "description": "A professional mobile-first volleyball scouting and scorekeeping application with rotation management and CSV export.",
+  "requestFramePermissions": []
+}
