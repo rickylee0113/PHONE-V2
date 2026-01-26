@@ -156,10 +156,18 @@ export const Court: React.FC<CourtProps> = ({
 
   return (
     <div className="w-full h-full relative bg-[#333]">
-        {/* SVG CONTAINER */}
+        {/* SVG CONTAINER 
+            ViewBox Logic:
+            Original: -4 -2 26 13 (Too much padding)
+            New: -2.5 -0.75 23 10.5
+            - X Start: -2.5 (Allows serve from x=-2.0 to be visible)
+            - Y Start: -0.75 (Tight top margin)
+            - Width: 23 (Left 2.5 + Court 18 + Right 2.5)
+            - Height: 10.5 (Top 0.75 + Court 9 + Bottom 0.75)
+        */}
         <svg 
             ref={svgRef}
-            viewBox="-4 -2 26 13" 
+            viewBox="-2.5 -0.75 23 10.5" 
             preserveAspectRatio="xMidYMid meet"
             className="w-full h-full touch-none select-none"
             onMouseDown={handlePointerDown}

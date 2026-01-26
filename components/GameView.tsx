@@ -610,17 +610,22 @@ export const GameView: React.FC<GameViewProps> = ({
             style={{ height: 'calc(60px + env(safe-area-inset-top))' }}
           >
               
-              {/* LEFT SIDE */}
+              {/* LEFT SIDE: My Team */}
               <div className="flex-1 flex items-center justify-end gap-1 min-w-0 pr-1">
                   
-                  {/* 1. Far Left: Controls & Undo */}
-                  <div className="mr-auto flex items-center gap-1">
-                     <HeaderBtn onClick={onUndo} disabled={!canUndo} size="small">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
-                     </HeaderBtn>
-                     <HeaderBtn onClick={() => handleRotation(true)} color="accent" size="small">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                      </HeaderBtn>
+                  {/* Unified Controls Group: Undo/Rotate + Score Adjust */}
+                  <div className="flex items-center gap-1 shrink-0">
+                      {/* 1. Controls (Undo/Rotate) */}
+                      <div className="flex items-center gap-1">
+                         <HeaderBtn onClick={onUndo} disabled={!canUndo} size="small">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                         </HeaderBtn>
+                         <HeaderBtn onClick={() => handleRotation(true)} color="accent" size="small">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                          </HeaderBtn>
+                      </div>
+
+                      {/* 2. Score Adjust */}
                       <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700">
                           <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red" size="small">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
@@ -631,15 +636,15 @@ export const GameView: React.FC<GameViewProps> = ({
                       </div>
                   </div>
 
-                  {/* 2. Team Name (Next to Score) */}
-                  <div className="flex flex-col items-end min-w-0 flex-1 overflow-hidden">
+                  {/* 3. Team Name */}
+                  <div className="flex flex-col items-end min-w-0 shrink overflow-hidden max-w-[30vw]">
                       <div className="flex items-center gap-1 justify-end w-full">
                            <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
                            <span className={`text-2xl font-black truncate ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
                       </div>
                   </div>
 
-                  {/* 3. Score (Next to Center SET) */}
+                  {/* 4. Score */}
                   <ScoreCard score={myScore} />
               </div>
 
@@ -648,23 +653,24 @@ export const GameView: React.FC<GameViewProps> = ({
                   <span className="text-[10px] text-gray-500 font-bold border border-gray-600 px-1 rounded bg-neutral-900/50">SET {currentSet}</span>
               </div>
 
-              {/* RIGHT SIDE */}
+              {/* RIGHT SIDE: Opponent Team */}
               <div className="flex-1 flex items-center justify-start gap-1 min-w-0 pl-1">
                   
-                  {/* 1. Score (Next to Center SET) */}
+                  {/* 1. Score */}
                   <ScoreCard score={opScore} />
 
-                  {/* 2. Team Name (Next to Score) */}
-                  <div className="flex flex-col items-start min-w-0 flex-1 overflow-hidden">
+                  {/* 2. Team Name */}
+                  <div className="flex flex-col items-start min-w-0 shrink overflow-hidden max-w-[30vw]">
                       <div className="flex items-center gap-1 w-full">
                            <span className={`text-2xl font-black truncate ${servingTeam === 'op' ? 'text-red-500' : 'text-red-300'}`}>{teamConfig.opName}</span>
                            <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
                       </div>
                   </div>
 
-                  {/* 3. Far Right: Controls & Redo */}
-                  <div className="ml-auto flex items-center gap-1">
-                       <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700">
+                  {/* Unified Controls Group: Score Adjust + Rotate/Redo */}
+                  <div className="flex items-center gap-1 shrink-0">
+                      {/* 3. Score Adjust */}
+                      <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700">
                           <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green" size="small">
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                           </HeaderBtn>
@@ -672,12 +678,16 @@ export const GameView: React.FC<GameViewProps> = ({
                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                           </HeaderBtn>
                       </div>
-                      <HeaderBtn onClick={() => handleRotation(false)} color="red" size="small">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                      </HeaderBtn>
-                      <HeaderBtn onClick={onRedo} disabled={!canRedo} size="small">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
-                      </HeaderBtn>
+
+                      {/* 4. Controls (Rotate/Redo) */}
+                      <div className="flex items-center gap-1">
+                          <HeaderBtn onClick={() => handleRotation(false)} color="red" size="small">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                          </HeaderBtn>
+                          <HeaderBtn onClick={onRedo} disabled={!canRedo} size="small">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
+                          </HeaderBtn>
+                      </div>
                   </div>
 
               </div>
