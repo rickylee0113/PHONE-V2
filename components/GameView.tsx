@@ -403,20 +403,20 @@ export const GameView: React.FC<GameViewProps> = ({
 
   // --- Renders ---
 
-  // Helper: Flip Card for Score (Standard Size)
-  const ScoreCard = ({ score }: { score: number }) => (
-      <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg px-2 w-14 h-10 flex items-center justify-center shadow-[0_2px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
+  // BIG Score Card (Revised for 2-row span)
+  const BigScoreCard = ({ score }: { score: number }) => (
+      <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg w-24 h-full flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
           {/* Shine effect */}
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/5 pointer-events-none"></div>
           {/* Middle Line */}
           <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-black/60 w-full z-10"></div>
-          <span className="font-mono text-3xl font-black text-white relative z-0 leading-none">
+          <span className="font-mono text-6xl font-black text-white relative z-0 leading-none tracking-tighter">
               {score.toString().padStart(2, '0')}
           </span>
       </div>
   );
 
-  // Helper: Control Button (Slightly reduced for dense bottom row)
+  // Compact Header Button
   const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral', size = 'normal' }: any) => {
       const bgColors: any = {
           neutral: 'bg-neutral-700 hover:bg-neutral-600 border-neutral-600',
@@ -426,7 +426,7 @@ export const GameView: React.FC<GameViewProps> = ({
           purple: 'bg-purple-600 hover:bg-purple-500 border-purple-400'
       };
       
-      const sizeClasses = 'w-9 h-8'; // Wider hit area
+      const sizeClasses = 'w-9 h-8'; 
       
       return (
         <button 
@@ -609,87 +609,87 @@ export const GameView: React.FC<GameViewProps> = ({
                 </div>
             </div>
 
-            {/* 2. CENTER COLUMN: Header (2 Rows) + Court */}
+            {/* 2. CENTER COLUMN: Header + Court */}
             <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
                 
-                {/* === NEW HEADER: 2 ROWS === */}
-                <div className="bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex flex-col">
+                {/* === NEW HEADER: 1 TALL ROW (h-22) === */}
+                <div className="h-24 bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
                     
-                    {/* ROW 1: INFO (Scoreboard) */}
-                    <div className="h-10 flex items-center justify-between px-2 bg-neutral-800/50 border-b border-white/5">
-                        
-                        {/* Left: My Team */}
-                        <div className="flex-1 flex items-center justify-end gap-2">
-                             <div className="flex flex-col items-end min-w-0 shrink overflow-hidden">
-                                <div className="flex items-center gap-1 justify-end w-full">
-                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
-                                    <span className={`text-sm font-black truncate ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
+                    {/* LEFT BLOCK: My Team Info + Controls + Score */}
+                    <div className="flex items-center gap-1 h-full">
+                        {/* Column: Name & Controls */}
+                        <div className="flex flex-col h-full justify-between items-start py-1">
+                            {/* Top: Name */}
+                            <div className="flex items-center gap-1 pl-1">
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
+                                <span className={`text-lg font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
+                            </div>
+                            {/* Bottom: Controls Group (Stacked) */}
+                            <div className="flex items-center gap-1">
+                                <HeaderBtn onClick={onToggleFullScreen} size="small">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                                </HeaderBtn>
+                                <HeaderBtn onClick={onUndo} disabled={!canUndo} size="small">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                                </HeaderBtn>
+                                <HeaderBtn onClick={() => handleRotation(true)} color="accent" size="small">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                                </HeaderBtn>
+                                {/* Score +/- */}
+                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
+                                    <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red" size="small">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                                    </HeaderBtn>
+                                    <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green" size="small">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                    </HeaderBtn>
                                 </div>
                             </div>
-                            <ScoreCard score={myScore} />
                         </div>
-
-                        {/* Center: Set */}
-                        <div className="mx-3 flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[10px] text-gray-500 font-bold border border-gray-600 px-1.5 rounded bg-neutral-900">S{currentSet}</span>
-                        </div>
-
-                        {/* Right: Op Team */}
-                        <div className="flex-1 flex items-center justify-start gap-2">
-                            <ScoreCard score={opScore} />
-                            <div className="flex flex-col items-start min-w-0 shrink overflow-hidden">
-                                <div className="flex items-center gap-1 w-full">
-                                    <span className={`text-sm font-black truncate ${servingTeam === 'op' ? 'text-red-500' : 'text-red-300'}`}>{teamConfig.opName}</span>
-                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
-                                </div>
-                            </div>
-                        </div>
-
+                        {/* Big Score */}
+                        <BigScoreCard score={myScore} />
                     </div>
 
-                    {/* ROW 2: CONTROLS (Buttons) */}
-                    <div className="h-11 flex items-center justify-between px-2 bg-neutral-800">
-                         {/* Left Group */}
-                         <div className="flex items-center gap-2">
-                            <HeaderBtn onClick={onToggleFullScreen} size="small">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-                            </HeaderBtn>
-                            <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
-                            <HeaderBtn onClick={onUndo} disabled={!canUndo} size="small">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
-                            </HeaderBtn>
-                            <HeaderBtn onClick={() => handleRotation(true)} color="accent" size="small">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                            </HeaderBtn>
-                            {/* My Score Adjust */}
-                            <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5 ml-1">
-                                <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red" size="small">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
-                                </HeaderBtn>
-                                <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green" size="small">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                </HeaderBtn>
-                            </div>
-                         </div>
+                    {/* CENTER: Set Info */}
+                    <div className="flex flex-col items-center justify-center shrink-0 px-2">
+                        <span className="text-xs text-gray-500 font-bold border border-gray-600 px-2 py-0.5 rounded bg-neutral-900 mb-1">SET {currentSet}</span>
+                        <div className="flex gap-1 text-[10px] text-gray-400 font-bold">
+                            <span>{mySetWins}</span>
+                            <span>-</span>
+                            <span>{opSetWins}</span>
+                        </div>
+                    </div>
 
-                         {/* Right Group */}
-                         <div className="flex items-center gap-2">
-                             {/* Op Score Adjust */}
-                             <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5 mr-1">
-                                <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green" size="small">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    {/* RIGHT BLOCK: Op Team Info + Controls + Score */}
+                    <div className="flex items-center gap-1 h-full">
+                        {/* Big Score */}
+                        <BigScoreCard score={opScore} />
+                        {/* Column: Name & Controls */}
+                        <div className="flex flex-col h-full justify-between items-end py-1">
+                             {/* Top: Name */}
+                            <div className="flex items-center gap-1 pr-1">
+                                <span className={`text-lg font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
+                            </div>
+                            {/* Bottom: Controls Group */}
+                            <div className="flex items-center gap-1">
+                                {/* Score +/- */}
+                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
+                                    <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green" size="small">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                    </HeaderBtn>
+                                    <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red" size="small">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                                    </HeaderBtn>
+                                </div>
+                                <HeaderBtn onClick={() => handleRotation(false)} color="red" size="small">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                                 </HeaderBtn>
-                                <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red" size="small">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                                <HeaderBtn onClick={onRedo} disabled={!canRedo} size="small">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
                                 </HeaderBtn>
                             </div>
-                            <HeaderBtn onClick={() => handleRotation(false)} color="red" size="small">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                            </HeaderBtn>
-                            <HeaderBtn onClick={onRedo} disabled={!canRedo} size="small">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
-                            </HeaderBtn>
-                         </div>
+                        </div>
                     </div>
 
                 </div>
