@@ -561,15 +561,27 @@ export const GameView: React.FC<GameViewProps> = ({
   }
 
   const renderSidebarItem = (side: TeamSide, pos: string | 'L', num: string) => {
-      const isActive = activeSide === side && selectedPos == pos;
+      // Fix: Strictly check types or convert to string for comparison to avoid TS build errors
+      const isActive = activeSide === side && String(selectedPos) === pos;
       const isLibero = pos === 'L';
+      
+      const handleTouchOrClick = () => {
+         const numericPos = pos === 'L' ? 'L' : parseInt(pos) as Position;
+         handlePlayerDown(side, numericPos);
+      };
+
+      const handleRelease = () => {
+          const numericPos = pos === 'L' ? 'L' : parseInt(pos) as Position;
+          handlePlayerUp(side, numericPos);
+      }
+
       return (
         <button
             key={`${side}-${pos}`}
-            onMouseDown={() => handlePlayerDown(side, pos as Position | 'L')}
-            onMouseUp={() => handlePlayerUp(side, pos as Position | 'L')}
-            onTouchStart={() => handlePlayerDown(side, pos as Position | 'L')}
-            onTouchEnd={() => handlePlayerUp(side, pos as Position | 'L')}
+            onMouseDown={handleTouchOrClick}
+            onMouseUp={handleRelease}
+            onTouchStart={handleTouchOrClick}
+            onTouchEnd={handleRelease}
             className={`w-full aspect-square mb-1 rounded-md flex flex-col items-center justify-center transition-all border select-none
                 ${isActive ? 'scale-105 shadow ring-2 ring-white z-10' : 'hover:bg-neutral-600'}
                 ${isLibero 
