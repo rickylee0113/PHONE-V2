@@ -624,7 +624,7 @@ export const GameView: React.FC<GameViewProps> = ({
             {/* 2. CENTER COLUMN: Header + Court */}
             <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
                 
-                {/* === NEW HEADER: 1 TALL ROW (h-22) === */}
+                {/* === NEW HEADER: 1 TALL ROW (h-24) === */}
                 <div className="h-24 bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
                     
                     {/* LEFT BLOCK: My Team Info + Controls + Score */}
