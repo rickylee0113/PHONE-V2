@@ -315,6 +315,7 @@ const App: React.FC = () => {
                 canUndo={history.length > 0}
                 canRedo={future.length > 0}
                 onExit={handleNewMatch}
+                onToggleFullScreen={toggleFullScreen}
             />
             )}
         </div>

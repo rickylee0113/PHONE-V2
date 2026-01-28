@@ -30,6 +30,7 @@ interface GameViewProps {
   canUndo: boolean;
   canRedo: boolean;
   onExit: () => void;
+  onToggleFullScreen: () => void;
 }
 
 // 狀態機定義
@@ -67,7 +68,8 @@ export const GameView: React.FC<GameViewProps> = ({
   onNewSet,
   canUndo,
   canRedo,
-  onExit
+  onExit,
+  onToggleFullScreen
 }) => {
   // --- State Machine & Data ---
   const [state, setState] = useState<InteractionState>('IDLE');
@@ -463,7 +465,7 @@ export const GameView: React.FC<GameViewProps> = ({
               <button onClick={() => setShowOptions(false)} className="bg-neutral-800 p-2 px-4 rounded-full text-white font-bold text-sm">✕ 關閉</button>
           </div>
           
-          <div className="grid grid-cols-2 gap-3 flex-1">
+          <div className="grid grid-cols-2 gap-3 flex-1 overflow-y-auto pb-4">
               <OptionBtn 
                   icon="📊" 
                   title="數據統計" 
@@ -487,6 +489,12 @@ export const GameView: React.FC<GameViewProps> = ({
                   title="讀取紀錄" 
                   desc="載入舊檔" 
                   onClick={handleLoadList} 
+              />
+              <OptionBtn 
+                  icon="⛶" 
+                  title="全螢幕" 
+                  desc="切換顯示模式" 
+                  onClick={() => { onToggleFullScreen(); setShowOptions(false); }} 
               />
               <OptionBtn 
                   icon="🏁" 
@@ -613,6 +621,13 @@ export const GameView: React.FC<GameViewProps> = ({
               {/* LEFT SIDE: My Team */}
               <div className="flex-1 flex items-center justify-end gap-1 min-w-0 pr-1">
                   
+                  {/* NEW: Fullscreen Button pinned to left (Green Box Area) */}
+                  <div className="mr-auto">
+                      <HeaderBtn onClick={onToggleFullScreen} size="small">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                      </HeaderBtn>
+                  </div>
+
                   {/* Unified Controls Group: Undo/Rotate + Score Adjust */}
                   <div className="flex items-center gap-1 shrink-0">
                       {/* 1. Controls (Undo/Rotate) */}
