@@ -403,20 +403,20 @@ export const GameView: React.FC<GameViewProps> = ({
 
   // --- Renders ---
 
-  // Helper: Flip Card for Score
+  // Helper: Flip Card for Score (COMPACT SIZE)
   const ScoreCard = ({ score }: { score: number }) => (
-      <div className="relative bg-neutral-800 border-2 border-neutral-600 rounded-lg px-1 w-16 h-12 flex items-center justify-center shadow-[0_3px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
+      <div className="relative bg-neutral-800 border border-neutral-600 rounded-md px-1 w-12 h-9 flex items-center justify-center shadow-[0_2px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-0.5">
           {/* Shine effect */}
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/5 pointer-events-none"></div>
           {/* Middle Line */}
           <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-black/60 w-full z-10"></div>
-          <span className="font-mono text-4xl font-black text-white relative z-0 leading-none">
+          <span className="font-mono text-2xl font-black text-white relative z-0 leading-none">
               {score.toString().padStart(2, '0')}
           </span>
       </div>
   );
 
-  // Helper: Control Button in Header (Smaller for controls)
+  // Helper: Control Button in Header (Smaller for controls) (COMPACT SIZE)
   const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral', size = 'normal' }: any) => {
       const bgColors: any = {
           neutral: 'bg-neutral-700 hover:bg-neutral-600 border-neutral-600',
@@ -426,13 +426,13 @@ export const GameView: React.FC<GameViewProps> = ({
           purple: 'bg-purple-600 hover:bg-purple-500 border-purple-400'
       };
       
-      const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-10 h-10';
+      const sizeClasses = 'w-7 h-7';
       
       return (
         <button 
             onClick={onClick}
             disabled={disabled}
-            className={`${sizeClasses} flex items-center justify-center rounded-lg border-b-2 active:border-b-0 active:translate-y-[2px] transition-all
+            className={`${sizeClasses} flex items-center justify-center rounded-md border-b-2 active:border-b-0 active:translate-y-[2px] transition-all
                 ${bgColors[color]} text-white disabled:opacity-30 disabled:cursor-not-allowed shrink-0`}
         >
             {children}
@@ -570,7 +570,7 @@ export const GameView: React.FC<GameViewProps> = ({
             onMouseUp={() => handlePlayerUp(side, pos as Position | 'L')}
             onTouchStart={() => handlePlayerDown(side, pos as Position | 'L')}
             onTouchEnd={() => handlePlayerUp(side, pos as Position | 'L')}
-            className={`w-full aspect-square mb-1 rounded-lg flex flex-col items-center justify-center transition-all border select-none
+            className={`w-full aspect-square mb-1 rounded-md flex flex-col items-center justify-center transition-all border select-none
                 ${isActive ? 'scale-105 shadow ring-2 ring-white z-10' : 'hover:bg-neutral-600'}
                 ${isLibero 
                     ? (isActive ? 'bg-yellow-400 text-black border-yellow-200' : 'bg-yellow-600 text-black border-transparent opacity-90')
@@ -579,8 +579,8 @@ export const GameView: React.FC<GameViewProps> = ({
                         : 'bg-neutral-700 text-gray-300 border-transparent'}
             `}
         >
-            <span className="text-sm font-black">{num}</span>
-            <span className="text-[8px] opacity-70 font-bold">{pos}</span>
+            <span className="text-xs font-black">{num}</span>
+            <span className="text-[7px] opacity-70 font-bold">{pos}</span>
         </button>
       );
   };
@@ -588,22 +588,21 @@ export const GameView: React.FC<GameViewProps> = ({
   return (
     <div className="w-full h-full bg-neutral-900 flex flex-row overflow-hidden relative select-none">
       
-      {/* 1. LEFT COLUMN: Rosters */}
-      {/* 使用 style 動態計算寬度，確保背景延伸到瀏海區域 (pl-safe-area) */}
+      {/* 1. LEFT COLUMN: Rosters (COMPACT WIDTH) */}
       <div 
         className="bg-neutral-800 border-r border-neutral-700 flex flex-row shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
-        style={{ width: 'calc(90px + env(safe-area-inset-left))' }}
+        style={{ width: 'calc(68px + env(safe-area-inset-left))' }} 
       >
-          <div className="flex-1 flex flex-col items-center py-2 px-1 border-r border-neutral-700/50 bg-neutral-800/50 overflow-y-auto no-scrollbar pt-[env(safe-area-inset-top)]">
-              <div className="text-[10px] text-accent font-bold mb-1">我方</div>
+          <div className="flex-1 flex flex-col items-center py-1 px-0.5 border-r border-neutral-700/50 bg-neutral-800/50 overflow-y-auto no-scrollbar pt-[env(safe-area-inset-top)]">
+              <div className="text-[9px] text-accent font-bold mb-0.5">我方</div>
               {Object.entries(initialMyLineup).map(([pos, num]) => renderSidebarItem('me', pos, num as string))}
-              <div className="my-1 w-full h-[1px] bg-white/10"></div>
+              <div className="my-0.5 w-full h-[1px] bg-white/10"></div>
               {renderSidebarItem('me', 'L', initialMyLibero)}
           </div>
-          <div className="flex-1 flex flex-col items-center py-2 px-1 overflow-y-auto no-scrollbar pt-[env(safe-area-inset-top)]">
-              <div className="text-[10px] text-red-500 font-bold mb-1">對手</div>
+          <div className="flex-1 flex flex-col items-center py-1 px-0.5 overflow-y-auto no-scrollbar pt-[env(safe-area-inset-top)]">
+              <div className="text-[9px] text-red-500 font-bold mb-0.5">對手</div>
               {Object.entries(initialOpLineup).map(([pos, num]) => renderSidebarItem('op', pos, num as string))}
-              <div className="my-1 w-full h-[1px] bg-white/10"></div>
+              <div className="my-0.5 w-full h-[1px] bg-white/10"></div>
               {renderSidebarItem('op', 'L', initialOpLibero)}
           </div>
       </div>
@@ -611,51 +610,50 @@ export const GameView: React.FC<GameViewProps> = ({
       {/* 2. CENTER COLUMN: TopBar + Court */}
       <div className="flex-1 flex flex-col relative bg-[#222]">
           
-          {/* TOP BAR (Header) */}
-          {/* 使用 style 處理高度，包含上方的安全區域 */}
+          {/* TOP BAR (Header) (COMPACT HEIGHT: 44px) */}
           <div 
-            className="bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-2 shrink-0 z-30 shadow-lg relative pt-[env(safe-area-inset-top)]"
-            style={{ height: 'calc(60px + env(safe-area-inset-top))' }}
+            className="bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-1 shrink-0 z-30 shadow-lg relative pt-[env(safe-area-inset-top)]"
+            style={{ height: 'calc(44px + env(safe-area-inset-top))' }}
           >
               
               {/* LEFT SIDE: My Team */}
-              <div className="flex-1 flex items-center justify-end gap-1 min-w-0 pr-1">
+              <div className="flex-1 flex items-center justify-end gap-1 min-w-0 pr-0.5">
                   
-                  {/* NEW: Fullscreen Button pinned to left (Green Box Area) */}
+                  {/* Fullscreen Button pinned to left (Green Box Area) */}
                   <div className="mr-auto">
                       <HeaderBtn onClick={onToggleFullScreen} size="small">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
                       </HeaderBtn>
                   </div>
 
                   {/* Unified Controls Group: Undo/Rotate + Score Adjust */}
                   <div className="flex items-center gap-1 shrink-0">
                       {/* 1. Controls (Undo/Rotate) */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5">
                          <HeaderBtn onClick={onUndo} disabled={!canUndo} size="small">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
                          </HeaderBtn>
                          <HeaderBtn onClick={() => handleRotation(true)} color="accent" size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                           </HeaderBtn>
                       </div>
 
                       {/* 2. Score Adjust */}
-                      <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700">
+                      <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
                           <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red" size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                           </HeaderBtn>
                           <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green" size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                           </HeaderBtn>
                       </div>
                   </div>
 
                   {/* 3. Team Name */}
-                  <div className="flex flex-col items-end min-w-0 shrink overflow-hidden max-w-[30vw]">
+                  <div className="flex flex-col items-end min-w-0 shrink overflow-hidden max-w-[25vw]">
                       <div className="flex items-center gap-1 justify-end w-full">
-                           <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
-                           <span className={`text-2xl font-black truncate ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
+                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
+                           <span className={`text-sm font-black truncate ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
                       </div>
                   </div>
 
@@ -664,43 +662,43 @@ export const GameView: React.FC<GameViewProps> = ({
               </div>
 
               {/* CENTER: SET */}
-              <div className="flex flex-col items-center justify-center shrink-0 mx-1">
-                  <span className="text-[10px] text-gray-500 font-bold border border-gray-600 px-1 rounded bg-neutral-900/50">SET {currentSet}</span>
+              <div className="flex flex-col items-center justify-center shrink-0 mx-0.5">
+                  <span className="text-[9px] text-gray-500 font-bold border border-gray-600 px-1 rounded bg-neutral-900/50">S{currentSet}</span>
               </div>
 
               {/* RIGHT SIDE: Opponent Team */}
-              <div className="flex-1 flex items-center justify-start gap-1 min-w-0 pl-1">
+              <div className="flex-1 flex items-center justify-start gap-1 min-w-0 pl-0.5">
                   
                   {/* 1. Score */}
                   <ScoreCard score={opScore} />
 
                   {/* 2. Team Name */}
-                  <div className="flex flex-col items-start min-w-0 shrink overflow-hidden max-w-[30vw]">
+                  <div className="flex flex-col items-start min-w-0 shrink overflow-hidden max-w-[25vw]">
                       <div className="flex items-center gap-1 w-full">
-                           <span className={`text-2xl font-black truncate ${servingTeam === 'op' ? 'text-red-500' : 'text-red-300'}`}>{teamConfig.opName}</span>
-                           <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
+                           <span className={`text-sm font-black truncate ${servingTeam === 'op' ? 'text-red-500' : 'text-red-300'}`}>{teamConfig.opName}</span>
+                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
                       </div>
                   </div>
 
                   {/* Unified Controls Group: Score Adjust + Rotate/Redo */}
                   <div className="flex items-center gap-1 shrink-0">
                       {/* 3. Score Adjust */}
-                      <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700">
+                      <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
                           <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green" size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                           </HeaderBtn>
                           <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red" size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                           </HeaderBtn>
                       </div>
 
                       {/* 4. Controls (Rotate/Redo) */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5">
                           <HeaderBtn onClick={() => handleRotation(false)} color="red" size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                           </HeaderBtn>
                           <HeaderBtn onClick={onRedo} disabled={!canRedo} size="small">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
                           </HeaderBtn>
                       </div>
                   </div>
@@ -712,7 +710,7 @@ export const GameView: React.FC<GameViewProps> = ({
           <div className="flex-1 relative overflow-hidden">
               {state === 'DRAWING' && (
                   <div className="absolute top-2 left-0 right-0 text-center pointer-events-none z-30">
-                      <span className="bg-black/60 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/20 animate-pulse shadow-lg backdrop-blur">
+                      <span className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold border border-white/20 animate-pulse shadow-lg backdrop-blur">
                           請在球場上滑動繪製球路
                       </span>
                   </div>
@@ -729,30 +727,29 @@ export const GameView: React.FC<GameViewProps> = ({
           </div>
       </div>
 
-      {/* 3. RIGHT COLUMN: Controls */}
-      {/* 使用 style 動態計算寬度，確保背景延伸到安全區域 (pr-safe-area) */}
+      {/* 3. RIGHT COLUMN: Controls (COMPACT WIDTH) */}
       <div 
         className="bg-neutral-800 border-l border-neutral-700 flex flex-col shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)]"
-        style={{ width: 'calc(80px + env(safe-area-inset-right))' }}
+        style={{ width: 'calc(64px + env(safe-area-inset-right))' }}
       >
           <div className="flex-1 flex flex-col pt-[env(safe-area-inset-top)] h-full">
              <div className="flex-1 flex flex-col min-h-0">
                 <button onClick={() => handleResult(ResultType.POINT)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all ${state === 'RESULT_PENDING' ? 'bg-emerald-600 text-white opacity-100 hover:bg-emerald-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                    <span className="text-lg font-black truncate">得分</span>
+                    <span className="text-sm font-black truncate">得分</span>
                     <span className="text-[9px] font-normal uppercase truncate">Point</span>
                 </button>
                 <button onClick={() => handleResult(ResultType.ERROR)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all ${state === 'RESULT_PENDING' ? 'bg-red-600 text-white opacity-100 hover:bg-red-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                    <span className="text-lg font-black truncate">失誤</span>
+                    <span className="text-sm font-black truncate">失誤</span>
                     <span className="text-[9px] font-normal uppercase truncate">Error</span>
                 </button>
                 <button onClick={() => handleResult(ResultType.NORMAL)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all ${state === 'RESULT_PENDING' ? 'bg-neutral-600 text-white opacity-100 hover:bg-neutral-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                    <span className="text-sm font-bold truncate">繼續</span>
-                    <span className="text-[9px] font-normal uppercase truncate">Play On</span>
+                    <span className="text-xs font-bold truncate">繼續</span>
+                    <span className="text-[8px] font-normal uppercase truncate">Play On</span>
                 </button>
             </div>
-            <button onClick={() => setShowOptions(true)} className="h-20 bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
-               <span className="text-2xl">☰</span>
-               <span className="text-[9px] mt-1">選項</span>
+            <button onClick={() => setShowOptions(true)} className="h-14 bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
+               <span className="text-xl">☰</span>
+               <span className="text-[9px] mt-0.5">選項</span>
             </button>
           </div>
       </div>
