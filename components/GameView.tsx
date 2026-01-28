@@ -608,7 +608,12 @@ export const GameView: React.FC<GameViewProps> = ({
       </div>
 
       {/* 2. CENTER COLUMN: TopBar + Court */}
-      <div className="flex-1 flex flex-col relative bg-[#222]">
+      {/* 
+          CRITICAL FIX: 
+          - min-w-0: Prevents flex items from overflowing their container
+          - overflow-hidden: Ensures child content doesn't spill out
+      */}
+      <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
           
           {/* TOP BAR (Header) (COMPACT HEIGHT: 44px) */}
           <div 
@@ -707,23 +712,27 @@ export const GameView: React.FC<GameViewProps> = ({
           </div>
 
           {/* COURT AREA */}
-          <div className="flex-1 relative overflow-hidden">
-              {state === 'DRAWING' && (
-                  <div className="absolute top-2 left-0 right-0 text-center pointer-events-none z-30">
-                      <span className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold border border-white/20 animate-pulse shadow-lg backdrop-blur">
-                          請在球場上滑動繪製球路
-                      </span>
-                  </div>
-              )}
-              <Court 
-                  myLineup={initialMyLineup}
-                  opLineup={initialOpLineup}
-                  state={state}
-                  activeSide={activeSide}
-                  selectedPos={selectedPos}
-                  action={selectedAction}
-                  onDrawingComplete={handleDrawingComplete}
-              />
+          {/* CRITICAL FIX: Use flex-1 with relative positioning for the wrapper, then ABSOLUTE positioning for the child. 
+              This forces the child to fit exactly into the flex space. */}
+          <div className="flex-1 relative w-full min-h-0">
+              <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-[#333]">
+                {state === 'DRAWING' && (
+                    <div className="absolute top-2 left-0 right-0 text-center pointer-events-none z-30">
+                        <span className="bg-black/60 text-white px-3 py-1 rounded-full text-[10px] font-bold border border-white/20 animate-pulse shadow-lg backdrop-blur">
+                            請在球場上滑動繪製球路
+                        </span>
+                    </div>
+                )}
+                <Court 
+                    myLineup={initialMyLineup}
+                    opLineup={initialOpLineup}
+                    state={state}
+                    activeSide={activeSide}
+                    selectedPos={selectedPos}
+                    action={selectedAction}
+                    onDrawingComplete={handleDrawingComplete}
+                />
+              </div>
           </div>
       </div>
 
