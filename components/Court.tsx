@@ -63,7 +63,7 @@ export const Court: React.FC<CourtProps> = ({
           }
           // If SERVE, move to outside (Left side of court), unless ignoring action (for watermarks)
           if (!ignoreAction && action === ActionType.SERVE) {
-              p.x = -2.0; 
+              p.x = -1.0; // Reduced form -2.0 to -1.0 to fit tighter viewBox
           }
       } 
       else {
@@ -77,7 +77,7 @@ export const Court: React.FC<CourtProps> = ({
           }
            // If SERVE, move to outside (Right side of court), unless ignoring action (for watermarks)
            if (!ignoreAction && action === ActionType.SERVE) {
-               p.x = 20.0;
+               p.x = 19.0; // Reduced from 20.0 to 19.0 to fit tighter viewBox
            }
       }
       return p;
@@ -157,17 +157,17 @@ export const Court: React.FC<CourtProps> = ({
   return (
     <div className="w-full h-full relative bg-[#333]">
         {/* SVG CONTAINER 
-            ViewBox Logic:
-            Original: -4 -2 26 13 (Too much padding)
-            New: -2.5 -0.75 23 10.5
-            - X Start: -2.5 (Allows serve from x=-2.0 to be visible)
-            - Y Start: -0.75 (Tight top margin)
-            - Width: 23 (Left 2.5 + Court 18 + Right 2.5)
-            - Height: 10.5 (Top 0.75 + Court 9 + Bottom 0.75)
+            ViewBox Logic Optimized for Mobile Fullscreen:
+            Old: -2.5 -0.75 23 10.5 (Ratio ~2.19) - Too wide, gets letterboxed horizontally on tall screens.
+            New: -1.5 -0.5 21 10.0 (Ratio 2.1) - Tighter margins.
+            - X Start: -1.5 (Enough for serve indicator)
+            - Y Start: -0.5 (Tighter top)
+            - Width: 21 (1.5 left + 18 court + 1.5 right)
+            - Height: 10 (0.5 top + 9 court + 0.5 bottom)
         */}
         <svg 
             ref={svgRef}
-            viewBox="-2.5 -0.75 23 10.5" 
+            viewBox="-1.5 -0.5 21 10" 
             preserveAspectRatio="xMidYMid meet"
             className="w-full h-full touch-none select-none"
             onMouseDown={handlePointerDown}
