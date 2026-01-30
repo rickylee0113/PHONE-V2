@@ -403,20 +403,20 @@ export const GameView: React.FC<GameViewProps> = ({
 
   // --- Renders ---
 
-  // BIG Score Card (Revised for 2-row span)
+  // BIG Score Card (Revised for Fluid Scaling)
   const BigScoreCard = ({ score }: { score: number }) => (
-      <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg w-24 h-full flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
+      <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg h-full aspect-[4/3] flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
           {/* Shine effect */}
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/5 pointer-events-none"></div>
           {/* Middle Line */}
           <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-black/60 w-full z-10"></div>
-          <span className="font-mono text-6xl font-black text-white relative z-0 leading-none tracking-tighter">
+          <span className="font-mono text-3xl md:text-5xl font-black text-white relative z-0 leading-none tracking-tighter">
               {score.toString().padStart(2, '0')}
           </span>
       </div>
   );
 
-  // Compact Header Button - REMOVED unused "size" prop
+  // Compact Header Button (Revised for Fluid Scaling)
   const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral' }: any) => {
       const bgColors: any = {
           neutral: 'bg-neutral-700 hover:bg-neutral-600 border-neutral-600',
@@ -426,16 +426,17 @@ export const GameView: React.FC<GameViewProps> = ({
           purple: 'bg-purple-600 hover:bg-purple-500 border-purple-400'
       };
       
-      const sizeClasses = 'w-9 h-8'; 
-      
       return (
         <button 
             onClick={onClick}
             disabled={disabled}
-            className={`${sizeClasses} flex items-center justify-center rounded-md border-b-2 active:border-b-0 active:translate-y-[2px] transition-all
-                ${bgColors[color]} text-white disabled:opacity-30 disabled:cursor-not-allowed shrink-0`}
+            className={`h-[80%] aspect-square max-h-[40px] flex items-center justify-center rounded-md border-b-2 active:border-b-0 active:translate-y-[2px] transition-all
+                ${bgColors[color]} text-white disabled:opacity-30 disabled:cursor-not-allowed shrink-0 p-1`}
         >
-            {children}
+             {/* Scale icon inside */}
+             <div className="w-full h-full flex items-center justify-center [&>svg]:w-[60%] [&>svg]:h-[60%]">
+                {children}
+             </div>
         </button>
       );
   };
@@ -457,7 +458,7 @@ export const GameView: React.FC<GameViewProps> = ({
       );
   };
 
-  // 全螢幕選項選單 (Compact One Page)
+  // 全螢幕選項選單
   const renderOptionsMenu = () => (
       <div className="absolute inset-0 z-[100] bg-neutral-900/95 backdrop-blur flex flex-col p-6 animate-fade-in pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
           <div className="flex justify-between items-center mb-4 shrink-0">
@@ -591,8 +592,8 @@ export const GameView: React.FC<GameViewProps> = ({
                         : 'bg-neutral-700 text-gray-300 border-transparent'}
             `}
         >
-            <span className="text-xs font-black">{num}</span>
-            <span className="text-[7px] opacity-70 font-bold">{pos}</span>
+            <span className="text-[min(3vw,12px)] font-black leading-none">{num}</span>
+            <span className="text-[min(2vw,8px)] opacity-70 font-bold leading-none mt-[1px]">{pos}</span>
         </button>
       );
   };
@@ -602,19 +603,18 @@ export const GameView: React.FC<GameViewProps> = ({
     <div className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
         <div className="w-full h-full md:w-[95%] md:h-[95%] bg-neutral-900 border md:border-neutral-800 md:rounded-2xl flex flex-row overflow-hidden relative select-none shadow-2xl">
       
-            {/* 1. LEFT COLUMN: Rosters */}
+            {/* 1. LEFT COLUMN: Rosters (13% Width, Min 50px) - Fluid Scaling */}
             <div 
-                className="bg-neutral-800 border-r border-neutral-700 flex flex-row shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
-                style={{ width: 'calc(68px + env(safe-area-inset-left))' }} 
+                className="bg-neutral-800 border-r border-neutral-700 flex flex-row shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] w-[13%] min-w-[50px]"
             >
                 <div className="flex-1 flex flex-col items-center py-1 px-0.5 border-r border-neutral-700/50 bg-neutral-800/50 overflow-y-auto no-scrollbar pt-2">
-                    <div className="text-[9px] text-accent font-bold mb-0.5">我方</div>
+                    <div className="text-[min(2.5vw,10px)] text-accent font-bold mb-0.5">我方</div>
                     {Object.entries(initialMyLineup).map(([pos, num]) => renderSidebarItem('me', pos, num as string))}
                     <div className="my-0.5 w-full h-[1px] bg-white/10"></div>
                     {renderSidebarItem('me', 'L', initialMyLibero)}
                 </div>
                 <div className="flex-1 flex flex-col items-center py-1 px-0.5 overflow-y-auto no-scrollbar pt-2">
-                    <div className="text-[9px] text-red-500 font-bold mb-0.5">對手</div>
+                    <div className="text-[min(2.5vw,10px)] text-red-500 font-bold mb-0.5">對手</div>
                     {Object.entries(initialOpLineup).map(([pos, num]) => renderSidebarItem('op', pos, num as string))}
                     <div className="my-0.5 w-full h-[1px] bg-white/10"></div>
                     {renderSidebarItem('op', 'L', initialOpLibero)}
@@ -624,32 +624,32 @@ export const GameView: React.FC<GameViewProps> = ({
             {/* 2. CENTER COLUMN: Header + Court */}
             <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
                 
-                {/* HEADER (h-20) */}
-                <div className="h-20 bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
+                {/* HEADER (16% Height, Min 50px) - Fluid Scaling */}
+                <div className="h-[16%] min-h-[50px] bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
                     {/* ... (Header content unchanged) ... */}
                     {/* LEFT BLOCK: My Team Info + Controls + Score */}
                     <div className="flex items-center gap-1 h-full">
                         <div className="flex flex-col h-full justify-between items-start py-0.5">
                             <div className="flex items-center gap-1 pl-1">
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
-                                <span className={`text-base font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
+                                <span className={`text-[min(3vw,16px)] font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
                             </div>
-                            <div className="flex items-center gap-1 scale-90 origin-left">
+                            <div className="flex items-center gap-1 h-[50%]">
                                 <HeaderBtn onClick={onToggleFullScreen}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
                                 </HeaderBtn>
                                 <HeaderBtn onClick={onUndo} disabled={!canUndo}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
                                 </HeaderBtn>
                                 <HeaderBtn onClick={() => handleRotation(true)} color="accent">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                                 </HeaderBtn>
-                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
+                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5 h-[80%] aspect-[2/1]">
                                     <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                                     </HeaderBtn>
                                     <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                     </HeaderBtn>
                                 </div>
                             </div>
@@ -659,8 +659,8 @@ export const GameView: React.FC<GameViewProps> = ({
 
                     {/* CENTER: Set Info */}
                     <div className="flex flex-col items-center justify-center shrink-0 px-2">
-                        <span className="text-xs text-gray-500 font-bold border border-gray-600 px-2 py-0.5 rounded bg-neutral-900 mb-1">SET {currentSet}</span>
-                        <div className="flex gap-1 text-[10px] text-gray-400 font-bold">
+                        <span className="text-[min(2.5vw,10px)] text-gray-500 font-bold border border-gray-600 px-2 py-0.5 rounded bg-neutral-900 mb-0.5">SET {currentSet}</span>
+                        <div className="flex gap-1 text-[min(2.5vw,10px)] text-gray-400 font-bold">
                             <span>{mySetWins}</span>
                             <span>-</span>
                             <span>{opSetWins}</span>
@@ -672,23 +672,23 @@ export const GameView: React.FC<GameViewProps> = ({
                         <BigScoreCard score={opScore} />
                         <div className="flex flex-col h-full justify-between items-end py-0.5">
                             <div className="flex items-center gap-1 pr-1">
-                                <span className={`text-base font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
+                                <span className={`text-[min(3vw,16px)] font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
                             </div>
-                            <div className="flex items-center gap-1 scale-90 origin-right">
-                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
+                            <div className="flex items-center gap-1 h-[50%]">
+                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5 h-[80%] aspect-[2/1]">
                                     <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                     </HeaderBtn>
                                     <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                                     </HeaderBtn>
                                 </div>
                                 <HeaderBtn onClick={() => handleRotation(false)} color="red">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                                 </HeaderBtn>
                                 <HeaderBtn onClick={onRedo} disabled={!canRedo}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
                                 </HeaderBtn>
                             </div>
                         </div>
@@ -718,35 +718,34 @@ export const GameView: React.FC<GameViewProps> = ({
                 </div>
             </div>
 
-            {/* 3. RIGHT COLUMN: Controls (Slimmer & Vertical Text) */}
+            {/* 3. RIGHT COLUMN: Controls (10% Width, Min 40px) - Fluid Scaling */}
             <div 
-                className="bg-neutral-800 border-l border-neutral-700 flex flex-col shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)]"
-                style={{ width: 'calc(48px + env(safe-area-inset-right))' }}
+                className="bg-neutral-800 border-l border-neutral-700 flex flex-col shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] w-[10%] min-w-[40px]"
             >
                 <div className="flex-1 flex flex-col pt-2 h-full">
                     <div className="flex-1 flex flex-col min-h-0">
                         <button onClick={() => handleResult(ResultType.POINT)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-emerald-600 text-white opacity-100 hover:bg-emerald-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <div className="flex flex-col text-sm font-black leading-tight">
+                            <div className="flex flex-col text-[min(3.5vw,14px)] font-black leading-tight">
                                 <span>得</span>
                                 <span>分</span>
                             </div>
                         </button>
                         <button onClick={() => handleResult(ResultType.ERROR)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-red-600 text-white opacity-100 hover:bg-red-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <div className="flex flex-col text-sm font-black leading-tight">
+                            <div className="flex flex-col text-[min(3.5vw,14px)] font-black leading-tight">
                                 <span>失</span>
                                 <span>誤</span>
                             </div>
                         </button>
                         <button onClick={() => handleResult(ResultType.NORMAL)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-neutral-600 text-white opacity-100 hover:bg-neutral-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                             <div className="flex flex-col text-xs font-bold leading-tight">
+                             <div className="flex flex-col text-[min(3vw,12px)] font-bold leading-tight">
                                 <span>繼</span>
                                 <span>續</span>
                             </div>
                         </button>
                     </div>
-                    <button onClick={() => setShowOptions(true)} className="h-16 bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
-                        <span className="text-xl mb-0.5">☰</span>
-                        <div className="flex flex-col text-[10px] leading-tight text-gray-400">
+                    <button onClick={() => setShowOptions(true)} className="h-[20%] max-h-[64px] bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
+                        <span className="text-[min(4vw,20px)] mb-0.5">☰</span>
+                        <div className="flex flex-col text-[min(2.5vw,10px)] leading-tight text-gray-400">
                                 <span>選</span>
                                 <span>項</span>
                         </div>
