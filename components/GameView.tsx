@@ -403,20 +403,20 @@ export const GameView: React.FC<GameViewProps> = ({
 
   // --- Renders ---
 
-  // BIG Score Card (Revised for Fluid Scaling)
+  // BIG Score Card (Uses VMIN for fluid font sizing)
   const BigScoreCard = ({ score }: { score: number }) => (
       <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg h-full aspect-[4/3] flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
           {/* Shine effect */}
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/5 pointer-events-none"></div>
           {/* Middle Line */}
           <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-black/60 w-full z-10"></div>
-          <span className="font-mono text-3xl md:text-5xl font-black text-white relative z-0 leading-none tracking-tighter">
+          <span className="font-mono font-black text-white relative z-0 leading-none tracking-tighter" style={{ fontSize: '8vmin' }}>
               {score.toString().padStart(2, '0')}
           </span>
       </div>
   );
 
-  // Compact Header Button (Revised for Fluid Scaling)
+  // Compact Header Button
   const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral' }: any) => {
       const bgColors: any = {
           neutral: 'bg-neutral-700 hover:bg-neutral-600 border-neutral-600',
@@ -433,8 +433,8 @@ export const GameView: React.FC<GameViewProps> = ({
             className={`h-[80%] aspect-square max-h-[40px] flex items-center justify-center rounded-md border-b-2 active:border-b-0 active:translate-y-[2px] transition-all
                 ${bgColors[color]} text-white disabled:opacity-30 disabled:cursor-not-allowed shrink-0 p-1`}
         >
-             {/* Scale icon inside */}
-             <div className="w-full h-full flex items-center justify-center [&>svg]:w-[60%] [&>svg]:h-[60%]">
+             {/* Icon fills container */}
+             <div className="w-full h-full flex items-center justify-center [&>svg]:w-[70%] [&>svg]:h-[70%]">
                 {children}
              </div>
         </button>
@@ -592,8 +592,8 @@ export const GameView: React.FC<GameViewProps> = ({
                         : 'bg-neutral-700 text-gray-300 border-transparent'}
             `}
         >
-            <span className="text-[min(3vw,12px)] font-black leading-none">{num}</span>
-            <span className="text-[min(2vw,8px)] opacity-70 font-bold leading-none mt-[1px]">{pos}</span>
+            <span className="font-black leading-none" style={{ fontSize: '2.5vmin' }}>{num}</span>
+            <span className="opacity-70 font-bold leading-none mt-[1px]" style={{ fontSize: '1.5vmin' }}>{pos}</span>
         </button>
       );
   };
@@ -603,18 +603,18 @@ export const GameView: React.FC<GameViewProps> = ({
     <div className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
         <div className="w-full h-full md:w-[95%] md:h-[95%] bg-neutral-900 border md:border-neutral-800 md:rounded-2xl flex flex-row overflow-hidden relative select-none shadow-2xl">
       
-            {/* 1. LEFT COLUMN: Rosters (13% Width, Min 50px) - Fluid Scaling */}
+            {/* 1. LEFT COLUMN: Rosters (14% Width) - STRICTLY PERCENTAGE, NO MIN-WIDTH */}
             <div 
-                className="bg-neutral-800 border-r border-neutral-700 flex flex-row shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] w-[13%] min-w-[50px]"
+                className="bg-neutral-800 border-r border-neutral-700 flex flex-row shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] w-[14%]"
             >
                 <div className="flex-1 flex flex-col items-center py-1 px-0.5 border-r border-neutral-700/50 bg-neutral-800/50 overflow-y-auto no-scrollbar pt-2">
-                    <div className="text-[min(2.5vw,10px)] text-accent font-bold mb-0.5">我方</div>
+                    <div className="text-accent font-bold mb-0.5" style={{ fontSize: '2vmin' }}>我方</div>
                     {Object.entries(initialMyLineup).map(([pos, num]) => renderSidebarItem('me', pos, num as string))}
                     <div className="my-0.5 w-full h-[1px] bg-white/10"></div>
                     {renderSidebarItem('me', 'L', initialMyLibero)}
                 </div>
                 <div className="flex-1 flex flex-col items-center py-1 px-0.5 overflow-y-auto no-scrollbar pt-2">
-                    <div className="text-[min(2.5vw,10px)] text-red-500 font-bold mb-0.5">對手</div>
+                    <div className="text-red-500 font-bold mb-0.5" style={{ fontSize: '2vmin' }}>對手</div>
                     {Object.entries(initialOpLineup).map(([pos, num]) => renderSidebarItem('op', pos, num as string))}
                     <div className="my-0.5 w-full h-[1px] bg-white/10"></div>
                     {renderSidebarItem('op', 'L', initialOpLibero)}
@@ -624,15 +624,15 @@ export const GameView: React.FC<GameViewProps> = ({
             {/* 2. CENTER COLUMN: Header + Court */}
             <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
                 
-                {/* HEADER (16% Height, Min 50px) - Fluid Scaling */}
-                <div className="h-[16%] min-h-[50px] bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
-                    {/* ... (Header content unchanged) ... */}
-                    {/* LEFT BLOCK: My Team Info + Controls + Score */}
+                {/* HEADER (15% Height) - STRICTLY PERCENTAGE, NO MIN-HEIGHT */}
+                <div className="h-[15%] bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
+                    
+                    {/* LEFT BLOCK */}
                     <div className="flex items-center gap-1 h-full">
                         <div className="flex flex-col h-full justify-between items-start py-0.5">
                             <div className="flex items-center gap-1 pl-1">
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
-                                <span className={`text-[min(3vw,16px)] font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
+                                <span className={`font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`} style={{ fontSize: '2.5vmin' }}>{teamConfig.myName}</span>
                             </div>
                             <div className="flex items-center gap-1 h-[50%]">
                                 <HeaderBtn onClick={onToggleFullScreen}>
@@ -659,20 +659,20 @@ export const GameView: React.FC<GameViewProps> = ({
 
                     {/* CENTER: Set Info */}
                     <div className="flex flex-col items-center justify-center shrink-0 px-2">
-                        <span className="text-[min(2.5vw,10px)] text-gray-500 font-bold border border-gray-600 px-2 py-0.5 rounded bg-neutral-900 mb-0.5">SET {currentSet}</span>
-                        <div className="flex gap-1 text-[min(2.5vw,10px)] text-gray-400 font-bold">
+                        <span className="text-gray-500 font-bold border border-gray-600 px-2 py-0.5 rounded bg-neutral-900 mb-0.5" style={{ fontSize: '2vmin' }}>SET {currentSet}</span>
+                        <div className="flex gap-1 text-gray-400 font-bold" style={{ fontSize: '2vmin' }}>
                             <span>{mySetWins}</span>
                             <span>-</span>
                             <span>{opSetWins}</span>
                         </div>
                     </div>
 
-                    {/* RIGHT BLOCK: Op Team Info + Controls + Score */}
+                    {/* RIGHT BLOCK */}
                     <div className="flex items-center gap-1 h-full">
                         <BigScoreCard score={opScore} />
                         <div className="flex flex-col h-full justify-between items-end py-0.5">
                             <div className="flex items-center gap-1 pr-1">
-                                <span className={`text-[min(3vw,16px)] font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
+                                <span className={`font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`} style={{ fontSize: '2.5vmin' }}>{teamConfig.opName}</span>
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
                             </div>
                             <div className="flex items-center gap-1 h-[50%]">
@@ -695,7 +695,7 @@ export const GameView: React.FC<GameViewProps> = ({
                     </div>
                 </div>
 
-                {/* COURT AREA */}
+                {/* COURT AREA - Scales perfectly because parents have strict % and flex-1 */}
                 <div className="flex-1 relative w-full min-h-0">
                     <div className="absolute inset-0 overflow-hidden flex items-center justify-center bg-[#333]">
                         {state === 'DRAWING' && (
@@ -718,34 +718,34 @@ export const GameView: React.FC<GameViewProps> = ({
                 </div>
             </div>
 
-            {/* 3. RIGHT COLUMN: Controls (10% Width, Min 40px) - Fluid Scaling */}
+            {/* 3. RIGHT COLUMN: Controls (10% Width) - STRICTLY PERCENTAGE, NO MIN-WIDTH */}
             <div 
-                className="bg-neutral-800 border-l border-neutral-700 flex flex-col shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] w-[10%] min-w-[40px]"
+                className="bg-neutral-800 border-l border-neutral-700 flex flex-col shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] w-[10%]"
             >
                 <div className="flex-1 flex flex-col pt-2 h-full">
                     <div className="flex-1 flex flex-col min-h-0">
                         <button onClick={() => handleResult(ResultType.POINT)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-emerald-600 text-white opacity-100 hover:bg-emerald-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <div className="flex flex-col text-[min(3.5vw,14px)] font-black leading-tight">
+                            <div className="flex flex-col font-black leading-tight" style={{ fontSize: '3vmin' }}>
                                 <span>得</span>
                                 <span>分</span>
                             </div>
                         </button>
                         <button onClick={() => handleResult(ResultType.ERROR)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-red-600 text-white opacity-100 hover:bg-red-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <div className="flex flex-col text-[min(3.5vw,14px)] font-black leading-tight">
+                            <div className="flex flex-col font-black leading-tight" style={{ fontSize: '3vmin' }}>
                                 <span>失</span>
                                 <span>誤</span>
                             </div>
                         </button>
                         <button onClick={() => handleResult(ResultType.NORMAL)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-neutral-600 text-white opacity-100 hover:bg-neutral-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                             <div className="flex flex-col text-[min(3vw,12px)] font-bold leading-tight">
+                             <div className="flex flex-col font-bold leading-tight" style={{ fontSize: '2.5vmin' }}>
                                 <span>繼</span>
                                 <span>續</span>
                             </div>
                         </button>
                     </div>
                     <button onClick={() => setShowOptions(true)} className="h-[20%] max-h-[64px] bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
-                        <span className="text-[min(4vw,20px)] mb-0.5">☰</span>
-                        <div className="flex flex-col text-[min(2.5vw,10px)] leading-tight text-gray-400">
+                        <span className="mb-0.5" style={{ fontSize: '3vmin' }}>☰</span>
+                        <div className="flex flex-col leading-tight text-gray-400" style={{ fontSize: '2vmin' }}>
                                 <span>選</span>
                                 <span>項</span>
                         </div>
@@ -753,7 +753,7 @@ export const GameView: React.FC<GameViewProps> = ({
                 </div>
             </div>
 
-            {/* Modals & Overlays */}
+            {/* Modals & Overlays (No Changes) */}
             {renderActionModal()}
             {renderSubModal()}
             {showOptions && renderOptionsMenu()}
@@ -769,8 +769,7 @@ export const GameView: React.FC<GameViewProps> = ({
                     onBack={() => setShowStats(false)} 
                 />
             )}
-            
-            {/* Save Modal & Load Modal etc */}
+            {/* Save/Load Modals ... (Rest of code is identical) */}
             {showSaveModal && (
                 <div className="absolute inset-0 z-[110] bg-black/80 flex items-center justify-center">
                     <div className="bg-neutral-800 p-6 rounded-xl w-64">
