@@ -416,8 +416,8 @@ export const GameView: React.FC<GameViewProps> = ({
       </div>
   );
 
-  // Compact Header Button
-  const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral', size = 'normal' }: any) => {
+  // Compact Header Button - REMOVED unused "size" prop
+  const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral' }: any) => {
       const bgColors: any = {
           neutral: 'bg-neutral-700 hover:bg-neutral-600 border-neutral-600',
           accent: 'bg-accent hover:bg-blue-600 border-blue-400',
@@ -638,21 +638,21 @@ export const GameView: React.FC<GameViewProps> = ({
                             </div>
                             {/* Bottom: Controls Group (Stacked) */}
                             <div className="flex items-center gap-1">
-                                <HeaderBtn onClick={onToggleFullScreen} size="small">
+                                <HeaderBtn onClick={onToggleFullScreen}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
                                 </HeaderBtn>
-                                <HeaderBtn onClick={onUndo} disabled={!canUndo} size="small">
+                                <HeaderBtn onClick={onUndo} disabled={!canUndo}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
                                 </HeaderBtn>
-                                <HeaderBtn onClick={() => handleRotation(true)} color="accent" size="small">
+                                <HeaderBtn onClick={() => handleRotation(true)} color="accent">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                                 </HeaderBtn>
                                 {/* Score +/- */}
                                 <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
-                                    <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red" size="small">
+                                    <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                                     </HeaderBtn>
-                                    <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green" size="small">
+                                    <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                     </HeaderBtn>
                                 </div>
@@ -687,17 +687,17 @@ export const GameView: React.FC<GameViewProps> = ({
                             <div className="flex items-center gap-1">
                                 {/* Score +/- */}
                                 <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
-                                    <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green" size="small">
+                                    <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                     </HeaderBtn>
-                                    <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red" size="small">
+                                    <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
                                     </HeaderBtn>
                                 </div>
-                                <HeaderBtn onClick={() => handleRotation(false)} color="red" size="small">
+                                <HeaderBtn onClick={() => handleRotation(false)} color="red">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                                 </HeaderBtn>
-                                <HeaderBtn onClick={onRedo} disabled={!canRedo} size="small">
+                                <HeaderBtn onClick={onRedo} disabled={!canRedo}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
                                 </HeaderBtn>
                             </div>
