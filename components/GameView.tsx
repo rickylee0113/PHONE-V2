@@ -598,9 +598,9 @@ export const GameView: React.FC<GameViewProps> = ({
   };
 
   return (
-    // SAFE ZONE WRAPPER: Centers the game view with a ~92% scale to prevent edge clipping on fullscreen
-    <div className="w-full h-full bg-black flex items-center justify-center">
-        <div className="w-[92%] h-[92%] bg-neutral-900 border border-neutral-800 rounded-2xl flex flex-row overflow-hidden relative select-none shadow-2xl">
+    // SAFE ZONE WRAPPER: Maximized for Mobile (Full Width/Height)
+    <div className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
+        <div className="w-full h-full md:w-[95%] md:h-[95%] bg-neutral-900 border md:border-neutral-800 md:rounded-2xl flex flex-row overflow-hidden relative select-none shadow-2xl">
       
             {/* 1. LEFT COLUMN: Rosters */}
             <div 
@@ -624,20 +624,17 @@ export const GameView: React.FC<GameViewProps> = ({
             {/* 2. CENTER COLUMN: Header + Court */}
             <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
                 
-                {/* === NEW HEADER: 1 TALL ROW (h-24) === */}
-                <div className="h-24 bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
-                    
+                {/* HEADER (h-20) */}
+                <div className="h-20 bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
+                    {/* ... (Header content unchanged) ... */}
                     {/* LEFT BLOCK: My Team Info + Controls + Score */}
                     <div className="flex items-center gap-1 h-full">
-                        {/* Column: Name & Controls */}
-                        <div className="flex flex-col h-full justify-between items-start py-1">
-                            {/* Top: Name */}
+                        <div className="flex flex-col h-full justify-between items-start py-0.5">
                             <div className="flex items-center gap-1 pl-1">
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
-                                <span className={`text-lg font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
+                                <span className={`text-base font-black truncate max-w-[120px] ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
                             </div>
-                            {/* Bottom: Controls Group (Stacked) */}
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 scale-90 origin-left">
                                 <HeaderBtn onClick={onToggleFullScreen}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
                                 </HeaderBtn>
@@ -647,7 +644,6 @@ export const GameView: React.FC<GameViewProps> = ({
                                 <HeaderBtn onClick={() => handleRotation(true)} color="accent">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                                 </HeaderBtn>
-                                {/* Score +/- */}
                                 <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
                                     <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
@@ -658,7 +654,6 @@ export const GameView: React.FC<GameViewProps> = ({
                                 </div>
                             </div>
                         </div>
-                        {/* Big Score */}
                         <BigScoreCard score={myScore} />
                     </div>
 
@@ -674,18 +669,13 @@ export const GameView: React.FC<GameViewProps> = ({
 
                     {/* RIGHT BLOCK: Op Team Info + Controls + Score */}
                     <div className="flex items-center gap-1 h-full">
-                        {/* Big Score */}
                         <BigScoreCard score={opScore} />
-                        {/* Column: Name & Controls */}
-                        <div className="flex flex-col h-full justify-between items-end py-1">
-                             {/* Top: Name */}
+                        <div className="flex flex-col h-full justify-between items-end py-0.5">
                             <div className="flex items-center gap-1 pr-1">
-                                <span className={`text-lg font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
+                                <span className={`text-base font-black truncate max-w-[120px] ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
                             </div>
-                            {/* Bottom: Controls Group */}
-                            <div className="flex items-center gap-1">
-                                {/* Score +/- */}
+                            <div className="flex items-center gap-1 scale-90 origin-right">
                                 <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5">
                                     <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -703,7 +693,6 @@ export const GameView: React.FC<GameViewProps> = ({
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 {/* COURT AREA */}
@@ -729,29 +718,38 @@ export const GameView: React.FC<GameViewProps> = ({
                 </div>
             </div>
 
-            {/* 3. RIGHT COLUMN: Controls */}
+            {/* 3. RIGHT COLUMN: Controls (Slimmer & Vertical Text) */}
             <div 
                 className="bg-neutral-800 border-l border-neutral-700 flex flex-col shrink-0 z-20 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)]"
-                style={{ width: 'calc(64px + env(safe-area-inset-right))' }}
+                style={{ width: 'calc(48px + env(safe-area-inset-right))' }}
             >
                 <div className="flex-1 flex flex-col pt-2 h-full">
                     <div className="flex-1 flex flex-col min-h-0">
-                        <button onClick={() => handleResult(ResultType.POINT)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all ${state === 'RESULT_PENDING' ? 'bg-emerald-600 text-white opacity-100 hover:bg-emerald-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <span className="text-sm font-black truncate">得分</span>
-                            <span className="text-[9px] font-normal uppercase truncate">Point</span>
+                        <button onClick={() => handleResult(ResultType.POINT)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-emerald-600 text-white opacity-100 hover:bg-emerald-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
+                            <div className="flex flex-col text-sm font-black leading-tight">
+                                <span>得</span>
+                                <span>分</span>
+                            </div>
                         </button>
-                        <button onClick={() => handleResult(ResultType.ERROR)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all ${state === 'RESULT_PENDING' ? 'bg-red-600 text-white opacity-100 hover:bg-red-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <span className="text-sm font-black truncate">失誤</span>
-                            <span className="text-[9px] font-normal uppercase truncate">Error</span>
+                        <button onClick={() => handleResult(ResultType.ERROR)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-red-600 text-white opacity-100 hover:bg-red-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
+                            <div className="flex flex-col text-sm font-black leading-tight">
+                                <span>失</span>
+                                <span>誤</span>
+                            </div>
                         </button>
-                        <button onClick={() => handleResult(ResultType.NORMAL)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all ${state === 'RESULT_PENDING' ? 'bg-neutral-600 text-white opacity-100 hover:bg-neutral-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
-                            <span className="text-xs font-bold truncate">繼續</span>
-                            <span className="text-[8px] font-normal uppercase truncate">Play On</span>
+                        <button onClick={() => handleResult(ResultType.NORMAL)} disabled={state !== 'RESULT_PENDING'} className={`flex-1 min-h-0 flex flex-col items-center justify-center border-b border-neutral-700 transition-all gap-1 ${state === 'RESULT_PENDING' ? 'bg-neutral-600 text-white opacity-100 hover:bg-neutral-500' : 'bg-neutral-800 text-gray-600 opacity-40 cursor-not-allowed'}`}>
+                             <div className="flex flex-col text-xs font-bold leading-tight">
+                                <span>繼</span>
+                                <span>續</span>
+                            </div>
                         </button>
                     </div>
-                    <button onClick={() => setShowOptions(true)} className="h-14 bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
-                    <span className="text-xl">☰</span>
-                    <span className="text-[9px] mt-0.5">選項</span>
+                    <button onClick={() => setShowOptions(true)} className="h-16 bg-neutral-900 border-t border-neutral-700 text-white font-bold flex flex-col items-center justify-center hover:bg-neutral-800 transition-colors shrink-0">
+                        <span className="text-xl mb-0.5">☰</span>
+                        <div className="flex flex-col text-[10px] leading-tight text-gray-400">
+                                <span>選</span>
+                                <span>項</span>
+                        </div>
                     </button>
                 </div>
             </div>

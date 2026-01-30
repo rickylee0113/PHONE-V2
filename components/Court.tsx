@@ -63,7 +63,7 @@ export const Court: React.FC<CourtProps> = ({
           }
           // If SERVE, move to outside (Left side of court), unless ignoring action (for watermarks)
           if (!ignoreAction && action === ActionType.SERVE) {
-              p.x = -1.0; // Reduced form -2.0 to -1.0 to fit tighter viewBox
+              p.x = -0.5; // Adjusted for tighter viewBox
           }
       } 
       else {
@@ -77,7 +77,7 @@ export const Court: React.FC<CourtProps> = ({
           }
            // If SERVE, move to outside (Right side of court), unless ignoring action (for watermarks)
            if (!ignoreAction && action === ActionType.SERVE) {
-               p.x = 19.0; // Reduced from 20.0 to 19.0 to fit tighter viewBox
+               p.x = 18.5; // Adjusted for tighter viewBox
            }
       }
       return p;
@@ -157,17 +157,14 @@ export const Court: React.FC<CourtProps> = ({
   return (
     <div className="w-full h-full relative bg-[#333]">
         {/* SVG CONTAINER 
-            ViewBox Logic Optimized for Mobile Fullscreen:
-            Old: -2.5 -0.75 23 10.5 (Ratio ~2.19) - Too wide, gets letterboxed horizontally on tall screens.
-            New: -1.5 -0.5 21 10.0 (Ratio 2.1) - Tighter margins.
-            - X Start: -1.5 (Enough for serve indicator)
-            - Y Start: -0.5 (Tighter top)
-            - Width: 21 (1.5 left + 18 court + 1.5 right)
-            - Height: 10 (0.5 top + 9 court + 0.5 bottom)
+            ViewBox Optimized for Tighter Fit:
+            X: -1 to 19 (Width 20). Court is 0-18. Padding 1 on each side.
+            Y: -0.5 to 9.5 (Height 10). Court is 0-9. Padding 0.5 on top/bottom.
+            Aspect Ratio: 20/10 = 2:1
         */}
         <svg 
             ref={svgRef}
-            viewBox="-1.5 -0.5 21 10" 
+            viewBox="-1 -0.5 20 10" 
             preserveAspectRatio="xMidYMid meet"
             className="w-full h-full touch-none select-none"
             onMouseDown={handlePointerDown}
