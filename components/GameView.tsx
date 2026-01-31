@@ -148,7 +148,7 @@ export const GameView: React.FC<GameViewProps> = ({
           myScore: isMyTeam ? myScore + delta : myScore,
           opScore: !isMyTeam ? opScore + delta : opScore,
           playerNumber: '', 
-          position: 1 as Position, // Use type assertion to avoid "number not assignable to Position" error
+          position: 1 as Position, 
           action: ActionType.ATTACK, 
           quality: ActionQuality.NORMAL,
           result: delta > 0 ? ResultType.POINT : ResultType.NORMAL,
@@ -255,7 +255,9 @@ export const GameView: React.FC<GameViewProps> = ({
       if (subTarget.pos === 'L') {
           newLiberoVal = subNumber;
       } else {
-          currentLineup[subTarget.pos] = subNumber;
+          // Fix: Type casting to ensure TS knows this key exists on Lineup
+          const posIndex = subTarget.pos as Position;
+          currentLineup[posIndex] = subNumber;
       }
 
       // Update state via onGameAction (no log, just update)
@@ -294,10 +296,12 @@ export const GameView: React.FC<GameViewProps> = ({
 
     const isMyTeam = activeSide === 'me';
     const lineup = isMyTeam ? initialMyLineup : initialOpLineup;
+    
     // Handle Libero number retrieval
+    // Logic: If 'L', get libero number. If Position (number), get from lineup.
     const playerNumber = selectedPos === 'L' 
         ? (isMyTeam ? initialMyLibero : initialOpLibero) 
-        : lineup[selectedPos];
+        : (selectedPos ? lineup[selectedPos as Position] : '?');
 
     let scoreUpdate: { myDelta: number, opDelta: number } | null = null;
     let newServingTeam: TeamSide | null = null;

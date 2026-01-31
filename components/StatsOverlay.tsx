@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { LogEntry, TeamConfig, TeamSide, ActionType, ResultType } from '../types';
+// @ts-ignore
 import html2canvas from 'html2canvas';
 
 interface StatsOverlayProps {
@@ -377,220 +378,148 @@ export const StatsOverlay: React.FC<StatsOverlayProps> = ({
             {selectedPlayer && (
                 <button 
                     onClick={() => setSelectedPlayer(null)}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors"
+                    className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors border border-slate-600"
                 >
-                    上一頁
+                    ← 回總覽
                 </button>
             )}
           </div>
-          <div className="flex items-center gap-3">
-             <div className="text-slate-200 font-bold text-sm">第 {currentSet} 局</div>
-             {selectedPlayer && (
-                 <button 
+          <div className="text-white font-bold text-lg">數據統計</div>
+      </div>
+
+      {/* 2. Content Area */}
+      <div className="flex-1 overflow-y-auto bg-slate-50">
+          
+          {selectedPlayer ? (
+              // === PLAYER DETAIL VIEW ===
+              <div className="p-4 pb-20">
+                  <div id="export-card" className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-4">
+                      <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
+                          <div>
+                              <div className="text-xs font-bold text-slate-400 uppercase mb-1">Player Profile</div>
+                              <div className="text-4xl font-black text-slate-900 flex items-center gap-2">
+                                  <span className="text-accent">#{selectedPlayer}</span>
+                              </div>
+                              <div className="text-sm font-bold text-slate-500 mt-1">
+                                  {activeTab === 'me' ? teamConfig.myName : teamConfig.opName}
+                              </div>
+                          </div>
+                          <div className="text-right">
+                               <div className="text-xs font-bold text-slate-400 uppercase mb-1">Total Points</div>
+                               <div className="text-4xl font-black text-emerald-600">{currentPlayerStats?.totalPoints}</div>
+                          </div>
+                      </div>
+                      
+                      {/* Shot Chart Visualizer */}
+                      <div className="mb-6">
+                           <div className="text-xs font-bold text-slate-400 uppercase mb-2">Shot Chart (Attacks & Serves)</div>
+                           {renderShotChart(undefined, 'landscape')}
+                      </div>
+
+                      <div className="space-y-1">
+                          {renderPlayerStatRow("攻擊得分 (Kills)", currentPlayerStats?.attackKills || 0, "text-emerald-600")}
+                          {renderPlayerStatRow("攻擊總數 (Attacks)", currentPlayerStats?.attackTotal || 0)}
+                          {renderPlayerStatRow("攔網得分 (Blocks)", currentPlayerStats?.blocks || 0, "text-blue-600")}
+                          {renderPlayerStatRow("發球得分 (Aces)", currentPlayerStats?.serveAces || 0, "text-indigo-600")}
+                          {renderPlayerStatRow("發球失誤 (Errors)", currentPlayerStats?.serveErrors || 0, "text-red-500")}
+                          {renderPlayerStatRow("防守 (Digs)", currentPlayerStats?.digs || 0, "text-orange-500")}
+                      </div>
+                  </div>
+                  
+                  <button 
                     onClick={handleDownloadImage}
                     disabled={isDownloading}
-                    className="bg-accent hover:bg-blue-600 text-white p-2 rounded-lg font-bold transition-colors shadow flex items-center gap-1 text-xs"
-                 >
-                    {isDownloading ? '...' : (
-                        <>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            下載圖檔
-                        </>
-                    )}
-                 </button>
-             )}
-          </div>
-      </div>
-
-      {/* 2. Scoreboard */}
-      <div className="bg-slate-50 p-4 flex justify-center items-center gap-6 border-b border-slate-200 shrink-0">
-          <div className="text-center">
-              <div className="text-3xl font-black text-accent">{myScore}</div>
-              <div className="text-xs text-slate-500 font-bold">局數 {mySetWins}</div>
-          </div>
-          <div className="text-slate-300 font-thin text-2xl">:</div>
-          <div className="text-center">
-              <div className="text-3xl font-black text-red-500">{opScore}</div>
-              <div className="text-xs text-slate-500 font-bold">局數 {opSetWins}</div>
-          </div>
-      </div>
-
-      {/* 4. Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 bg-white">
-        
-        {/* TEAM VIEW */}
-        {!selectedPlayer && (
-            <div className="flex flex-col h-full max-w-lg mx-auto w-full">
-                <div className="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-slate-200">
-                    <div className="flex justify-between mb-4 px-4">
-                        <span className="font-bold text-accent">{teamConfig.myName}</span>
-                        <span className="font-bold text-red-500">{teamConfig.opName}</span>
-                    </div>
-                    {renderComparisonRow("攻擊 (得/手)", `${myTeamStats.attackKills}/${myTeamStats.attackTotal}`, `${opTeamStats.attackKills}/${opTeamStats.attackTotal}`, true, true)}
-                    {renderComparisonRow("攻擊率", `${myTeamStats.attackTotal > 0 ? Math.round((myTeamStats.attackKills/myTeamStats.attackTotal)*100) : 0}%`, `${opTeamStats.attackTotal > 0 ? Math.round((opTeamStats.attackKills/opTeamStats.attackTotal)*100) : 0}%`)}
-                    {renderComparisonRow("攔網得分", myTeamStats.blocks, opTeamStats.blocks)}
-                    {renderComparisonRow("發球得分", myTeamStats.serveAces, opTeamStats.serveAces)}
-                    {renderComparisonRow("發球失誤", myTeamStats.serveErrors, opTeamStats.serveErrors)}
-                </div>
-
-                <div className="flex p-1 bg-slate-100 rounded-xl mb-4 shrink-0">
-                  <button onClick={() => setActiveTab('me')} className={`flex-1 py-2 font-bold rounded-lg transition-all text-sm ${activeTab === 'me' ? 'bg-white text-accent shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{teamConfig.myName} 球員</button>
-                  <button onClick={() => setActiveTab('op')} className={`flex-1 py-2 font-bold rounded-lg transition-all text-sm ${activeTab === 'op' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{teamConfig.opName} 球員</button>
-                </div>
-
-                <div className="grid grid-cols-4 gap-3">
-                    {activePlayersList.players.length === 0 ? (
-                         <div className="col-span-4 text-center text-slate-400 py-10">尚無紀錄</div>
-                    ) : (
-                        activePlayersList.players.map(p => {
-                            const isTop1 = p === activePlayersList.top1;
-                            const isTop2 = p === activePlayersList.top2;
-                            return (
-                                <button key={p} onClick={() => setSelectedPlayer(p)} className={`aspect-square rounded-xl font-black text-2xl flex flex-col items-center justify-center shadow-sm transition-all relative border-2 ${isTop1 ? 'bg-yellow-50 border-yellow-400 text-yellow-600 scale-105 shadow-md' : isTop2 ? 'bg-slate-100 border-slate-400 text-slate-600 scale-105' : 'bg-white border-slate-200 text-slate-700 hover:border-accent hover:text-accent'}`}>
-                                    {p}
-                                    {(isTop1 || isTop2) && <div className={`text-[10px] absolute bottom-1 font-bold ${isTop1 ? 'text-yellow-600' : 'text-slate-500'}`}>{isTop1 ? '得分王' : '次高'}</div>}
-                                </button>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
-        )}
-
-        {/* PLAYER VIEW (Screen) */}
-        {selectedPlayer && currentPlayerStats && (
-            <div className="flex flex-col items-center max-w-lg mx-auto w-full">
-                 <div className="mb-2 text-center">
-                     <span className={`text-5xl font-black block ${activeTab === 'me' ? 'text-accent' : 'text-red-500'}`}>#{selectedPlayer}</span>
-                     <span className="text-sm text-slate-400 font-bold">{activeTab === 'me' ? teamConfig.myName : teamConfig.opName}</span>
-                 </div>
-                 
-                 {/* Mini Court (Screen - Landscape) */}
-                 <div className="w-full max-w-[400px]">
-                    {renderShotChart(undefined, 'landscape')}
-                    <div className="flex justify-center flex-wrap gap-x-4 gap-y-1 text-[10px] font-bold mb-4">
-                        <span className="flex items-center gap-1 text-green-600"><span className="w-2 h-2 bg-green-500 rounded-full"></span>攻擊得分</span>
-                        <span className="flex items-center gap-1 text-blue-600"><span className="w-2 h-2 bg-blue-500 rounded-full"></span>發球得分</span>
-                        <span className="flex items-center gap-1 text-red-500"><span className="w-2 h-2 bg-red-500 rounded-full"></span>失誤</span>
-                        <span className="flex items-center gap-1 text-slate-500"><span className="w-2 h-2 bg-slate-400 rounded-full"></span>一般</span>
-                    </div>
-                 </div>
-
-                 <div className="w-full bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-sm">
-                    {renderPlayerStatRow("攻擊 (得分/出手)", `${currentPlayerStats.attackKills} / ${currentPlayerStats.attackTotal}`, "text-green-600")}
-                    {renderPlayerStatRow("攻擊率", `${currentPlayerStats.attackTotal > 0 ? Math.round((currentPlayerStats.attackKills/currentPlayerStats.attackTotal)*100) : 0}%`, "text-blue-600")}
-                    {renderPlayerStatRow("攔網得分", currentPlayerStats.blocks, "text-yellow-600")}
-                    {renderPlayerStatRow("發球得分", currentPlayerStats.serveAces, "text-blue-600")}
-                    {renderPlayerStatRow("發球失誤", currentPlayerStats.serveErrors, "text-red-500")}
-                    {renderPlayerStatRow("總得分", currentPlayerStats.totalPoints, "text-slate-900")}
-                </div>
-            </div>
-        )}
-      </div>
-
-      {/* --- EXPORT CARD (A4 Layout, Vertical Court) --- */}
-      {selectedPlayer && currentPlayerStats && (
-          <div 
-            id="export-card"
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: '-9999px',
-                width: '794px', 
-                minHeight: '1123px',
-                backgroundColor: 'white',
-                zIndex: -1,
-                padding: '40px',
-                display: 'flex',
-                flexDirection: 'column',
-                fontFamily: 'sans-serif',
-                color: '#1e293b'
-            }}
-          >
-             {/* Header */}
-             <div className="border-b-4 border-slate-900 pb-4 mb-8 flex justify-between items-end">
-                <div>
-                    <h1 className="text-4xl font-black text-slate-900 mb-1">{teamConfig.matchName || '比賽紀錄'}</h1>
-                    <div className="text-xl font-bold text-slate-500">{new Date().toLocaleDateString()}</div>
-                </div>
-                <div className="text-right">
-                    <div className="text-lg font-bold">
-                        <span className="text-accent">{teamConfig.myName}</span>
-                        <span className="mx-2 text-slate-300">vs</span>
-                        <span className="text-red-500">{teamConfig.opName}</span>
-                    </div>
-                    <div className="text-sm text-slate-400 font-bold">VolleyScout Pro Report</div>
-                </div>
-             </div>
-
-             {/* Player Info */}
-             <div className="flex items-center gap-6 mb-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-black text-white ${activeTab === 'me' ? 'bg-accent' : 'bg-red-500'}`}>
-                    {selectedPlayer}
-                </div>
-                <div>
-                    <div className="text-sm text-slate-500 font-bold uppercase tracking-widest mb-1">Player Stats</div>
-                    <div className="text-3xl font-bold text-slate-900">背號 #{selectedPlayer}</div>
-                    <div className="text-xl font-bold text-slate-500">{activeTab === 'me' ? teamConfig.myName : teamConfig.opName}</div>
-                </div>
-                <div className="ml-auto flex gap-8">
-                     <div className="text-center">
-                         <div className="text-3xl font-black text-slate-900">{currentPlayerStats.totalPoints}</div>
-                         <div className="text-xs font-bold text-slate-500 uppercase">總得分</div>
-                     </div>
-                     <div className="text-center">
-                         <div className="text-3xl font-black text-slate-900">{currentPlayerStats.attackTotal > 0 ? Math.round((currentPlayerStats.attackKills/currentPlayerStats.attackTotal)*100) : 0}%</div>
-                         <div className="text-xs font-bold text-slate-500 uppercase">攻擊率</div>
-                     </div>
-                </div>
-             </div>
-
-             {/* Content Grid */}
-             <div className="grid grid-cols-2 gap-8 flex-1">
-                 {/* Left: Stats */}
-                 <div className="flex flex-col gap-4">
-                     <h3 className="text-xl font-bold text-slate-900 border-l-4 border-accent pl-3">詳細數據</h3>
-                     <div className="bg-white border-2 border-slate-200 rounded-xl overflow-hidden">
-                        {renderPlayerStatRow("攻擊得分", currentPlayerStats.attackKills, "text-green-600")}
-                        {renderPlayerStatRow("攻擊出手", currentPlayerStats.attackTotal, "text-slate-800")}
-                        {renderPlayerStatRow("攔網得分", currentPlayerStats.blocks, "text-yellow-600")}
-                        {renderPlayerStatRow("發球得分", currentPlayerStats.serveAces, "text-blue-600")}
-                        {renderPlayerStatRow("發球失誤", currentPlayerStats.serveErrors, "text-red-500")}
-                        {renderPlayerStatRow("防守(Digs)", currentPlayerStats.digs, "text-slate-800")}
-                     </div>
-                     
-                     <div className="mt-8">
-                        <h3 className="text-xl font-bold text-slate-900 border-l-4 border-slate-400 pl-3 mb-4">圖例說明</h3>
-                        <div className="space-y-3 text-sm font-bold bg-slate-50 p-4 rounded-xl">
-                            <div className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-green-500"></span> 攻擊得分 (Attack Kill)</div>
-                            <div className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-blue-500"></span> 發球得分 (Serve Ace)</div>
-                            <div className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-red-500"></span> 失誤 (Error)</div>
-                            <div className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-slate-400"></span> 一般 (In Play)</div>
+                    className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+                  >
+                     {isDownloading ? '匯出中...' : '📥 下載球員卡'}
+                  </button>
+              </div>
+          ) : (
+              // === TEAM OVERVIEW VIEW ===
+              <div className="p-4 pb-20">
+                   
+                   {/* Score Summary */}
+                   <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-4 flex items-center justify-between">
+                        <div className="text-center">
+                            <div className="text-3xl font-black text-accent mb-1">{mySetWins}</div>
+                            <div className="text-xs font-bold text-slate-400">SETS</div>
                         </div>
-                     </div>
-                 </div>
-
-                 {/* Right: Chart (Portrait with Out-of-Bounds Padding) */}
-                 <div className="flex flex-col">
-                     <h3 className="text-xl font-bold text-slate-900 border-l-4 border-slate-900 pl-3 mb-4">落點分析 (Shot Chart)</h3>
-                     {/* Use a container with no padding but correct rounding to let SVG background show */}
-                     <div className="w-full bg-slate-100 rounded-xl border border-slate-200 overflow-hidden flex justify-center">
-                        <div className="w-full">
-                             {renderShotChart(undefined, 'portrait')}
+                        <div className="flex flex-col items-center px-4 flex-1">
+                             <div className="flex items-center gap-4 text-5xl font-black text-slate-900 leading-none">
+                                 <span>{myScore}</span>
+                                 <span className="text-slate-300 text-3xl">-</span>
+                                 <span>{opScore}</span>
+                             </div>
+                             <div className="text-xs font-bold text-slate-400 mt-2 bg-slate-100 px-3 py-1 rounded-full">SET {currentSet}</div>
                         </div>
-                     </div>
-                     <div className="text-center text-xs text-slate-400 mt-2 font-bold">
-                         灰色區域為界外區 (Out of Bounds)
-                     </div>
-                 </div>
-             </div>
+                        <div className="text-center">
+                            <div className="text-3xl font-black text-red-500 mb-1">{opSetWins}</div>
+                            <div className="text-xs font-bold text-slate-400">SETS</div>
+                        </div>
+                   </div>
 
-             {/* Footer */}
-             <div className="mt-auto pt-8 border-t border-slate-200 text-center text-slate-400 text-sm font-bold">
-                 Generated by VolleyScout Pro
-             </div>
-          </div>
-      )}
+                   {/* Comparison Table */}
+                   <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-4">
+                        <div className="flex justify-between mb-4 border-b border-slate-100 pb-2">
+                             <span className="font-bold text-accent truncate max-w-[40%]">{teamConfig.myName}</span>
+                             <span className="font-bold text-red-500 truncate max-w-[40%]">{teamConfig.opName}</span>
+                        </div>
+                        <div className="space-y-1">
+                            {renderComparisonRow("Points", myTeamStats.totalPoints, opTeamStats.totalPoints, myTeamStats.totalPoints > opTeamStats.totalPoints, opTeamStats.totalPoints > myTeamStats.totalPoints)}
+                            {renderComparisonRow("Kills", myTeamStats.attackKills, opTeamStats.attackKills)}
+                            {renderComparisonRow("Blocks", myTeamStats.blocks, opTeamStats.blocks)}
+                            {renderComparisonRow("Aces", myTeamStats.serveAces, opTeamStats.serveAces)}
+                            {renderComparisonRow("Digs", myTeamStats.digs, opTeamStats.digs)}
+                            {renderComparisonRow("S.Err", myTeamStats.serveErrors, opTeamStats.serveErrors)}
+                        </div>
+                   </div>
+
+                   {/* Player List */}
+                   <div>
+                       <div className="flex gap-2 mb-3">
+                           <button 
+                              onClick={() => setActiveTab('me')}
+                              className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${activeTab === 'me' ? 'bg-accent text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200'}`}
+                           >
+                               我方球員
+                           </button>
+                           <button 
+                              onClick={() => setActiveTab('op')}
+                              className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${activeTab === 'op' ? 'bg-red-500 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200'}`}
+                           >
+                               對手球員
+                           </button>
+                       </div>
+                       
+                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                           {activePlayersList.players.map(p => {
+                               const isTopScorer = p === activePlayersList.top1;
+                               const isSecondScorer = p === activePlayersList.top2;
+                               
+                               return (
+                                   <button 
+                                      key={p} 
+                                      onClick={() => setSelectedPlayer(p)}
+                                      className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-md transition-all text-left relative overflow-hidden group"
+                                   >
+                                       {isTopScorer && <div className="absolute top-0 right-0 bg-yellow-400 text-[10px] font-black px-2 py-0.5 rounded-bl-lg text-yellow-900">MVP</div>}
+                                       {isSecondScorer && <div className="absolute top-0 right-0 bg-slate-300 text-[10px] font-black px-2 py-0.5 rounded-bl-lg text-slate-700">2nd</div>}
+                                       
+                                       <div className="text-3xl font-black text-slate-900 mb-1">#{p}</div>
+                                       <div className="text-xs font-bold text-slate-400 group-hover:text-blue-500">查看數據 →</div>
+                                   </button>
+                               );
+                           })}
+                           {activePlayersList.players.length === 0 && (
+                               <div className="col-span-full py-8 text-center text-slate-400 font-bold bg-white rounded-xl border border-slate-200 border-dashed">
+                                   尚無球員數據
+                               </div>
+                           )}
+                       </div>
+                   </div>
+              </div>
+          )}
+      </div>
     </div>
   );
 };

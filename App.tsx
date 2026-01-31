@@ -4,30 +4,31 @@ import { SetupView } from './components/SetupView';
 import { GameView } from './components/GameView';
 import { Lineup, TeamConfig, LogEntry, TeamSide, GameState, RoleMapping } from './types';
 
+// Helper functions to generate FRESH state objects every time
+const getInitialLineup = (): Lineup => ({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' });
+const getInitialRoles = (): RoleMapping => ({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+const getInitialConfig = (): TeamConfig => ({ matchName: '', myName: '', opName: '' });
+
 const App: React.FC = () => {
   const [view, setView] = useState<'setup' | 'game'>('setup');
   const [isPortrait, setIsPortrait] = useState(false);
-  const [isGameActive, setIsGameActive] = useState(false); // New: Track if a game is in progress
-  const [setupKey, setSetupKey] = useState(0); // Key to force remount of SetupView
+  const [isGameActive, setIsGameActive] = useState(false); 
+  const [setupKey, setSetupKey] = useState(0); 
   
   // Team Configuration
-  const [teamConfig, setTeamConfig] = useState<TeamConfig>({
-    matchName: '',
-    myName: '',
-    opName: ''
-  });
+  const [teamConfig, setTeamConfig] = useState<TeamConfig>(getInitialConfig());
 
   // Current Game State
   const [currentSet, setCurrentSet] = useState(1);
   const [mySetWins, setMySetWins] = useState(0);
   const [opSetWins, setOpSetWins] = useState(0);
   
-  const [myLineup, setMyLineup] = useState<Lineup>(({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' }));
-  const [opLineup, setOpLineup] = useState<Lineup>(({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' }));
+  const [myLineup, setMyLineup] = useState<Lineup>(getInitialLineup());
+  const [opLineup, setOpLineup] = useState<Lineup>(getInitialLineup());
   
   // Roles
-  const [myRoles, setMyRoles] = useState<RoleMapping>({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
-  const [opRoles, setOpRoles] = useState<RoleMapping>({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+  const [myRoles, setMyRoles] = useState<RoleMapping>(getInitialRoles());
+  const [opRoles, setOpRoles] = useState<RoleMapping>(getInitialRoles());
 
   // Liberos
   const [myLibero, setMyLibero] = useState<string>('');
@@ -45,7 +46,6 @@ const App: React.FC = () => {
   // PWA Install Prompt
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
-  // Orientation Check
   useEffect(() => {
     const checkOrientation = () => {
       setIsPortrait(window.innerHeight > window.innerWidth);
@@ -86,7 +86,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Prevent accidental close/refresh
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (view === 'game' && logs.length > 0) {
@@ -100,12 +99,10 @@ const App: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [view, logs]);
 
-  // Helper to capture current state
   const getCurrentState = (): GameState => ({
     currentSet, mySetWins, opSetWins, myLineup, opLineup, myRoles, opRoles, myLibero, opLibero, myScore, opScore, servingTeam, logs
   });
 
-  // Helper to push state to history before modification
   const pushHistory = () => {
     const current = getCurrentState();
     setHistory(prev => [...prev, current]);
@@ -125,8 +122,8 @@ const App: React.FC = () => {
     setOpSetWins(previous.opSetWins);
     setMyLineup(previous.myLineup);
     setOpLineup(previous.opLineup);
-    setMyRoles(previous.myRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
-    setOpRoles(previous.opRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setMyRoles(previous.myRoles || getInitialRoles());
+    setOpRoles(previous.opRoles || getInitialRoles());
     setMyLibero(previous.myLibero);
     setOpLibero(previous.opLibero);
     setMyScore(previous.myScore);
@@ -148,8 +145,8 @@ const App: React.FC = () => {
     setOpSetWins(next.opSetWins);
     setMyLineup(next.myLineup);
     setOpLineup(next.opLineup);
-    setMyRoles(next.myRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
-    setOpRoles(next.opRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setMyRoles(next.myRoles || getInitialRoles());
+    setOpRoles(next.opRoles || getInitialRoles());
     setMyLibero(next.myLibero);
     setOpLibero(next.opLibero);
     setMyScore(next.myScore);
@@ -184,45 +181,43 @@ const App: React.FC = () => {
     
     setView('game');
     setIsGameActive(true);
-
-    // Attempt fullscreen on start if on mobile
-    if (window.innerWidth < 1024) {
-       // toggleFullScreen(); 
-    }
   };
 
-  // Called when user clicks "Resume Match" in Setup
   const handleResumeGame = () => {
       setView('game');
   };
 
-  // Called when user clicks "Home" in GameView
   const handleHome = () => {
       setView('setup');
-      // Do NOT clear state. isGameActive remains true.
   };
 
-  // Completely reset match
+  // --- HARD RESET FUNCTION ---
   const handleNewMatch = () => {
-    // Reset Data
-    setTeamConfig({ matchName: '', myName: '', opName: '' });
-    setMyLineup({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' });
-    setOpLineup({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' });
-    setMyRoles({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
-    setOpRoles({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    console.log("Triggering Full Match Reset");
+    // 1. Reset Data with fresh objects
+    setTeamConfig(getInitialConfig());
+    setMyLineup(getInitialLineup());
+    setOpLineup(getInitialLineup());
+    setMyRoles(getInitialRoles());
+    setOpRoles(getInitialRoles());
     setMyLibero('');
     setOpLibero('');
+    
+    // 2. Reset Scores & State
     setCurrentSet(1);
     setMySetWins(0);
     setOpSetWins(0);
+    setMyScore(0);
+    setOpScore(0);
     setLogs([]);
     setHistory([]);
     setFuture([]);
-    setMyScore(0);
-    setOpScore(0);
     
+    // 3. Reset View State
     setIsGameActive(false);
-    setSetupKey(prev => prev + 1); // Force remount of SetupView to clear form
+    
+    // 4. Force Remount of SetupView
+    setSetupKey(prev => prev + 1); 
     setView('setup');
   };
 
@@ -234,10 +229,6 @@ const App: React.FC = () => {
       setOpSetWins(prev => prev + 1);
     }
     setCurrentSet(prev => prev + 1);
-    
-    // For next set, we might want to go to setup to check lineups? 
-    // Or stay in game? Usually in volleyball you submit new lineup.
-    // Let's go to Setup but keep game active.
     setView('setup'); 
   };
 
@@ -248,16 +239,11 @@ const App: React.FC = () => {
     newServingTeam: TeamSide | null
   ) => {
     pushHistory();
-    
-    if (newLog) {
-      setLogs(prev => [...prev, { ...newLog, setNumber: currentSet }]);
-    }
-    
+    if (newLog) setLogs(prev => [...prev, { ...newLog, setNumber: currentSet }]);
     if (scoreUpdate) {
         setMyScore(prev => prev + scoreUpdate.myDelta);
         setOpScore(prev => prev + scoreUpdate.opDelta);
     }
-
     if (lineupUpdate) {
        if (lineupUpdate.isMyTeam) {
            setMyLineup(lineupUpdate.newLineup);
@@ -267,10 +253,7 @@ const App: React.FC = () => {
            if (lineupUpdate.newLibero !== undefined) setOpLibero(lineupUpdate.newLibero);
        }
     }
-
-    if (newServingTeam) {
-      setServingTeam(newServingTeam);
-    }
+    if (newServingTeam) setServingTeam(newServingTeam);
   };
 
   const handleLoadGame = (savedState: GameState, config: TeamConfig) => {
@@ -280,8 +263,8 @@ const App: React.FC = () => {
     setOpSetWins(savedState.opSetWins || 0);
     setMyLineup(savedState.myLineup);
     setOpLineup(savedState.opLineup);
-    setMyRoles(savedState.myRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
-    setOpRoles(savedState.opRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setMyRoles(savedState.myRoles || getInitialRoles());
+    setOpRoles(savedState.opRoles || getInitialRoles());
     setMyLibero(savedState.myLibero || '');
     setOpLibero(savedState.opLibero || '');
     setMyScore(savedState.myScore);
@@ -293,7 +276,6 @@ const App: React.FC = () => {
     setIsGameActive(true);
   };
 
-  // Determine simulator dimensions based on view (Desktop Only)
   const simulatorClasses = view === 'setup'
       ? "md:w-[430px] md:h-[932px]" 
       : "md:w-[932px] md:h-[430px]";
@@ -311,7 +293,7 @@ const App: React.FC = () => {
 
             {view === 'setup' ? (
             <SetupView 
-                key={setupKey} // Key ensures component remounts on new match
+                key={setupKey} // THIS KEY IS CRITICAL FOR RESET
                 initialConfig={teamConfig}
                 initialMyLineup={myLineup}
                 initialOpLineup={opLineup}
@@ -349,7 +331,7 @@ const App: React.FC = () => {
                 onNewSet={handleNextSet}
                 canUndo={history.length > 0}
                 canRedo={future.length > 0}
-                onExit={handleHome} // "Exit" now goes to Home
+                onExit={handleHome}
                 onToggleFullScreen={toggleFullScreen}
             />
             )}
