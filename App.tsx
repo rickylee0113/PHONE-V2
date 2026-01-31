@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { SetupView } from './components/SetupView';
 import { GameView } from './components/GameView';
@@ -9,6 +8,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<'setup' | 'game'>('setup');
   const [isPortrait, setIsPortrait] = useState(false);
   const [isGameActive, setIsGameActive] = useState(false); // New: Track if a game is in progress
+  const [setupKey, setSetupKey] = useState(0); // Key to force remount of SetupView
   
   // Team Configuration
   const [teamConfig, setTeamConfig] = useState<TeamConfig>({
@@ -222,6 +222,7 @@ const App: React.FC = () => {
     setOpScore(0);
     
     setIsGameActive(false);
+    setSetupKey(prev => prev + 1); // Force remount of SetupView to clear form
     setView('setup');
   };
 
@@ -310,6 +311,7 @@ const App: React.FC = () => {
 
             {view === 'setup' ? (
             <SetupView 
+                key={setupKey} // Key ensures component remounts on new match
                 initialConfig={teamConfig}
                 initialMyLineup={myLineup}
                 initialOpLineup={opLineup}
