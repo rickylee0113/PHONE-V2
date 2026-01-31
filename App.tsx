@@ -1,12 +1,14 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { SetupView } from './components/SetupView';
 import { GameView } from './components/GameView';
-import { Lineup, TeamConfig, LogEntry, TeamSide, GameState } from './types';
+import { Lineup, TeamConfig, LogEntry, TeamSide, GameState, RoleMapping } from './types';
 
 const App: React.FC = () => {
   const [view, setView] = useState<'setup' | 'game'>('setup');
   const [isPortrait, setIsPortrait] = useState(false);
+  const [isGameActive, setIsGameActive] = useState(false); // New: Track if a game is in progress
   
   // Team Configuration
   const [teamConfig, setTeamConfig] = useState<TeamConfig>({
@@ -23,6 +25,10 @@ const App: React.FC = () => {
   const [myLineup, setMyLineup] = useState<Lineup>(({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' }));
   const [opLineup, setOpLineup] = useState<Lineup>(({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' }));
   
+  // Roles
+  const [myRoles, setMyRoles] = useState<RoleMapping>({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+  const [opRoles, setOpRoles] = useState<RoleMapping>({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+
   // Liberos
   const [myLibero, setMyLibero] = useState<string>('');
   const [opLibero, setOpLibero] = useState<string>('');
@@ -42,8 +48,6 @@ const App: React.FC = () => {
   // Orientation Check
   useEffect(() => {
     const checkOrientation = () => {
-      // Logic: If on mobile (no mouse hover usually) and height > width -> Portrait
-      // On Desktop simulator, we don't want this warning to pop up unless the window is actually narrow
       setIsPortrait(window.innerHeight > window.innerWidth);
     };
     checkOrientation();
@@ -98,7 +102,7 @@ const App: React.FC = () => {
 
   // Helper to capture current state
   const getCurrentState = (): GameState => ({
-    currentSet, mySetWins, opSetWins, myLineup, opLineup, myLibero, opLibero, myScore, opScore, servingTeam, logs
+    currentSet, mySetWins, opSetWins, myLineup, opLineup, myRoles, opRoles, myLibero, opLibero, myScore, opScore, servingTeam, logs
   });
 
   // Helper to push state to history before modification
@@ -121,6 +125,8 @@ const App: React.FC = () => {
     setOpSetWins(previous.opSetWins);
     setMyLineup(previous.myLineup);
     setOpLineup(previous.opLineup);
+    setMyRoles(previous.myRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setOpRoles(previous.opRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
     setMyLibero(previous.myLibero);
     setOpLibero(previous.opLibero);
     setMyScore(previous.myScore);
@@ -142,6 +148,8 @@ const App: React.FC = () => {
     setOpSetWins(next.opSetWins);
     setMyLineup(next.myLineup);
     setOpLineup(next.opLineup);
+    setMyRoles(next.myRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setOpRoles(next.opRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
     setMyLibero(next.myLibero);
     setOpLibero(next.opLibero);
     setMyScore(next.myScore);
@@ -154,6 +162,8 @@ const App: React.FC = () => {
       config: TeamConfig, 
       initialMyLineup: Lineup, 
       initialOpLineup: Lineup, 
+      initialMyRoles: RoleMapping,
+      initialOpRoles: RoleMapping,
       initialMyLibero: string, 
       initialOpLibero: string, 
       initialServingTeam: TeamSide
@@ -161,6 +171,8 @@ const App: React.FC = () => {
     setTeamConfig(config);
     setMyLineup(initialMyLineup);
     setOpLineup(initialOpLineup);
+    setMyRoles(initialMyRoles);
+    setOpRoles(initialOpRoles);
     setMyLibero(initialMyLibero);
     setOpLibero(initialOpLibero);
     setMyScore(0);
@@ -171,6 +183,7 @@ const App: React.FC = () => {
     setFuture([]);
     
     setView('game');
+    setIsGameActive(true);
 
     // Attempt fullscreen on start if on mobile
     if (window.innerWidth < 1024) {
@@ -178,10 +191,25 @@ const App: React.FC = () => {
     }
   };
 
+  // Called when user clicks "Resume Match" in Setup
+  const handleResumeGame = () => {
+      setView('game');
+  };
+
+  // Called when user clicks "Home" in GameView
+  const handleHome = () => {
+      setView('setup');
+      // Do NOT clear state. isGameActive remains true.
+  };
+
+  // Completely reset match
   const handleNewMatch = () => {
+    // Reset Data
     setTeamConfig({ matchName: '', myName: '', opName: '' });
     setMyLineup({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' });
     setOpLineup({ 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' });
+    setMyRoles({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setOpRoles({ 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
     setMyLibero('');
     setOpLibero('');
     setCurrentSet(1);
@@ -190,6 +218,10 @@ const App: React.FC = () => {
     setLogs([]);
     setHistory([]);
     setFuture([]);
+    setMyScore(0);
+    setOpScore(0);
+    
+    setIsGameActive(false);
     setView('setup');
   };
 
@@ -201,6 +233,10 @@ const App: React.FC = () => {
       setOpSetWins(prev => prev + 1);
     }
     setCurrentSet(prev => prev + 1);
+    
+    // For next set, we might want to go to setup to check lineups? 
+    // Or stay in game? Usually in volleyball you submit new lineup.
+    // Let's go to Setup but keep game active.
     setView('setup'); 
   };
 
@@ -243,6 +279,8 @@ const App: React.FC = () => {
     setOpSetWins(savedState.opSetWins || 0);
     setMyLineup(savedState.myLineup);
     setOpLineup(savedState.opLineup);
+    setMyRoles(savedState.myRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+    setOpRoles(savedState.opRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
     setMyLibero(savedState.myLibero || '');
     setOpLibero(savedState.opLibero || '');
     setMyScore(savedState.myScore);
@@ -251,28 +289,17 @@ const App: React.FC = () => {
     setLogs(savedState.logs);
     setHistory([]);
     setFuture([]);
+    setIsGameActive(true);
   };
 
   // Determine simulator dimensions based on view (Desktop Only)
-  // Setup View -> Portrait Mode (approx iPhone 14 Pro Max)
-  // Game View  -> Landscape Mode
   const simulatorClasses = view === 'setup'
       ? "md:w-[430px] md:h-[932px]" 
       : "md:w-[932px] md:h-[430px]";
 
   return (
-    // Outer Background - Centers the app on Desktop
     <div className="fixed inset-0 w-full h-full bg-[#111] flex items-center justify-center font-sans">
-        
-        {/* 
-           Responsive Phone Frame Container:
-           - Mobile (< md): w-full h-full, no radius, no border.
-           - Desktop (>= md): Dynamic width/height based on view state (Portrait/Landscape), centered, rounded corners.
-           - Transition: Smooth rotation effect when switching views.
-        */}
         <div className={`relative w-full h-full ${simulatorClasses} md:max-w-[95vw] md:max-h-[95vh] md:rounded-[3rem] md:border-[12px] md:border-[#222] md:shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden bg-neutral-900 transition-all duration-500 ease-in-out`}>
-            
-            {/* Orientation Warning (Only shows if actual inner viewport is portrait during GAME view) */}
             {view === 'game' && isPortrait && (
                 <div className="absolute inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center text-white p-8 text-center animate-fade-in">
                     <div className="text-6xl mb-6 animate-pulse">⟳</div>
@@ -281,17 +308,21 @@ const App: React.FC = () => {
                 </div>
             )}
 
-            {/* App Views */}
             {view === 'setup' ? (
             <SetupView 
                 initialConfig={teamConfig}
                 initialMyLineup={myLineup}
                 initialOpLineup={opLineup}
+                initialMyRoles={myRoles}
+                initialOpRoles={opRoles}
                 initialMyLibero={myLibero}
                 initialOpLibero={opLibero}
                 onStart={handleGameStart}
                 onInstallApp={deferredPrompt ? handleInstallClick : undefined}
                 onToggleFullScreen={toggleFullScreen}
+                isGameActive={isGameActive}
+                onResume={handleResumeGame}
+                onNewMatch={handleNewMatch}
             />
             ) : (
             <GameView 
@@ -301,6 +332,8 @@ const App: React.FC = () => {
                 opSetWins={opSetWins}
                 initialMyLineup={myLineup}
                 initialOpLineup={opLineup}
+                initialMyRoles={myRoles}
+                initialOpRoles={opRoles}
                 initialMyLibero={myLibero}
                 initialOpLibero={opLibero}
                 myScore={myScore}
@@ -314,7 +347,7 @@ const App: React.FC = () => {
                 onNewSet={handleNextSet}
                 canUndo={history.length > 0}
                 canRedo={future.length > 0}
-                onExit={handleNewMatch}
+                onExit={handleHome} // "Exit" now goes to Home
                 onToggleFullScreen={toggleFullScreen}
             />
             )}

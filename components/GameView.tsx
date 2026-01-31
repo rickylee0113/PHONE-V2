@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { Lineup, TeamConfig, LogEntry, Position, ActionType, ActionQuality, ResultType, Coordinate, TeamSide, SavedGame, GameState } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import { Lineup, TeamConfig, LogEntry, Position, ActionType, ActionQuality, ResultType, Coordinate, TeamSide, SavedGame, GameState, RoleMapping } from '../types';
 import { Court } from './Court';
 import { StatsOverlay } from './StatsOverlay';
 
@@ -11,6 +11,8 @@ interface GameViewProps {
   opSetWins: number;
   initialMyLineup: Lineup;
   initialOpLineup: Lineup;
+  initialMyRoles: RoleMapping;
+  initialOpRoles: RoleMapping;
   initialMyLibero: string;
   initialOpLibero: string;
   myScore: number;
@@ -55,6 +57,8 @@ export const GameView: React.FC<GameViewProps> = ({
   opSetWins,
   initialMyLineup,
   initialOpLineup,
+  initialMyRoles,
+  initialOpRoles,
   initialMyLibero,
   initialOpLibero,
   myScore,
@@ -81,6 +85,9 @@ export const GameView: React.FC<GameViewProps> = ({
   const [showSubModal, setShowSubModal] = useState(false);
   const [subNumber, setSubNumber] = useState('');
   const [subTarget, setSubTarget] = useState<{side: TeamSide, pos: Position | 'L'} | null>(null);
+
+  // Score Adjustment Modal State
+  const [scoreAdjTarget, setScoreAdjTarget] = useState<{side: TeamSide, anchor: DOMRect} | null>(null);
 
   // 畫線資料 (SVG 座標系)
   const [startCoord, setStartCoord] = useState<Coordinate | null>(null);
@@ -111,7 +118,10 @@ export const GameView: React.FC<GameViewProps> = ({
   };
 
   const handleScoreAdjust = (isMyTeam: boolean, delta: number) => {
-      // Manual score adjustment
+      // Manual score adjustment with negative check
+      const currentScore = isMyTeam ? myScore : opScore;
+      if (currentScore + delta < 0) return; // Prevent negative score
+
       const scoreUpdate = { 
           myDelta: isMyTeam ? delta : 0, 
           opDelta: !isMyTeam ? delta : 0 
@@ -192,6 +202,7 @@ export const GameView: React.FC<GameViewProps> = ({
     setSelectedAction(null);
     setStartCoord(null);
     setEndCoord(null);
+    setScoreAdjTarget(null);
   };
 
   // --- Input Handlers (Sidebar) ---
@@ -358,6 +369,7 @@ export const GameView: React.FC<GameViewProps> = ({
       state: { 
           currentSet, mySetWins, opSetWins, 
           myLineup: initialMyLineup, opLineup: initialOpLineup, 
+          myRoles: initialMyRoles, opRoles: initialOpRoles, 
           myLibero: initialMyLibero, opLibero: initialOpLibero,
           myScore, opScore, servingTeam, logs 
       },
@@ -403,18 +415,28 @@ export const GameView: React.FC<GameViewProps> = ({
 
   // --- Renders ---
 
-  // BIG Score Card (Fixed min-sizes for readability)
-  const BigScoreCard = ({ score }: { score: number }) => (
-      <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg h-full aspect-[4/3] min-w-[50px] flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1">
-          {/* Shine effect */}
-          <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/5 pointer-events-none"></div>
-          {/* Middle Line */}
-          <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-black/60 w-full z-10"></div>
-          <span className="font-mono font-black text-white relative z-0 leading-none tracking-tighter text-4xl md:text-5xl lg:text-6xl">
-              {score.toString().padStart(2, '0')}
-          </span>
-      </div>
-  );
+  // BIG Score Card (Interactive)
+  const BigScoreCard = ({ score, side }: { score: number, side: TeamSide }) => {
+      const handleClick = (e: React.MouseEvent) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setScoreAdjTarget({ side, anchor: rect });
+      };
+
+      return (
+        <button 
+            onClick={handleClick}
+            className="relative bg-neutral-800 border border-neutral-600 rounded-lg h-full aspect-[4/3] min-w-[50px] flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-1 active:translate-y-1 transition-transform"
+        >
+            {/* Shine effect */}
+            <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/5 pointer-events-none"></div>
+            {/* Middle Line */}
+            <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-black/60 w-full z-10"></div>
+            <span className="font-mono font-black text-white relative z-0 leading-none tracking-tighter text-4xl md:text-5xl lg:text-6xl">
+                {score.toString().padStart(2, '0')}
+            </span>
+        </button>
+      );
+  };
 
   // Compact Header Button
   const HeaderBtn = ({ onClick, children, disabled = false, color = 'neutral' }: any) => {
@@ -504,15 +526,54 @@ export const GameView: React.FC<GameViewProps> = ({
                   onClick={() => { onNewSet(); setShowOptions(false); }} 
               />
               <OptionBtn 
-                  icon="🚪" 
-                  title="Exit" 
-                  desc="結束比賽" 
-                  color="red"
+                  icon="🏠" 
+                  title="回到首頁" 
+                  desc="暫離比賽" 
+                  color="neutral"
                   onClick={() => { onExit(); setShowOptions(false); }} 
               />
           </div>
       </div>
   );
+  
+  // Score Adjustment Popover
+  const renderScoreAdjModal = () => {
+      if (!scoreAdjTarget) return null;
+      
+      const { side, anchor } = scoreAdjTarget;
+      // Calculate position relative to viewport
+      // Position clearly below the button, centered horizontally on it
+      const top = anchor.bottom + 10;
+      const left = anchor.left + (anchor.width / 2);
+      const isMyTeam = side === 'me';
+
+      return (
+          <>
+            <div className="fixed inset-0 z-[60]" onClick={() => setScoreAdjTarget(null)}></div>
+            <div 
+                className="fixed z-[70] flex flex-col gap-2 bg-neutral-800 p-2 rounded-xl border border-neutral-600 shadow-2xl animate-fade-in origin-top"
+                style={{ top: top, left: left, transform: 'translateX(-50%)' }}
+            >
+                <div className="text-white text-xs font-bold text-center mb-1">手動調整</div>
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => { handleScoreAdjust(isMyTeam, 1); }}
+                        className="w-12 h-12 bg-green-600 hover:bg-green-500 rounded-lg text-white font-black text-2xl shadow flex items-center justify-center active:scale-95 active:brightness-110"
+                    >
+                        +
+                    </button>
+                    <button 
+                        onClick={() => { handleScoreAdjust(isMyTeam, -1); }}
+                        className="w-12 h-12 bg-red-600 hover:bg-red-500 rounded-lg text-white font-black text-2xl shadow flex items-center justify-center active:scale-95 active:brightness-110"
+                    >
+                        -
+                    </button>
+                </div>
+                <button onClick={() => setScoreAdjTarget(null)} className="mt-1 w-full py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-xs font-bold text-gray-300">確認</button>
+            </div>
+          </>
+      );
+  };
   
   // ... Action Picker, Sub Modal, Sidebar helpers remain same ...
   const renderActionModal = () => {
@@ -623,75 +684,64 @@ export const GameView: React.FC<GameViewProps> = ({
             {/* 2. CENTER COLUMN: Header + Court */}
             <div className="flex-1 flex flex-col relative bg-[#222] min-w-0 overflow-hidden">
                 
-                {/* HEADER (18% Height) - Added min-height to ensure touch targets */}
-                <div className="h-[18%] min-h-[65px] bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative flex items-center justify-between px-2 py-1">
+                {/* HEADER (18% Height) */}
+                <div className="h-[18%] min-h-[64px] bg-neutral-800 border-b border-neutral-700 shrink-0 z-30 shadow-lg relative grid grid-cols-[auto_1fr_auto] items-center px-1 py-1">
                     
-                    {/* LEFT BLOCK */}
-                    <div className="flex items-center gap-2 h-full py-1">
-                        <div className="flex flex-col h-full justify-center items-start">
-                            <div className="flex items-center gap-1 pl-1 mb-1">
-                                <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
-                                <span className={`font-black truncate max-w-[120px] text-sm md:text-lg ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>{teamConfig.myName}</span>
-                            </div>
-                            <div className="flex items-center gap-1 h-full">
-                                <HeaderBtn onClick={onToggleFullScreen}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-                                </HeaderBtn>
-                                <HeaderBtn onClick={onUndo} disabled={!canUndo}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
-                                </HeaderBtn>
-                                <HeaderBtn onClick={() => handleRotation(true)} color="accent">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                                </HeaderBtn>
-                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5 h-full">
-                                    <HeaderBtn onClick={() => handleScoreAdjust(true, -1)} color="red">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
-                                    </HeaderBtn>
-                                    <HeaderBtn onClick={() => handleScoreAdjust(true, 1)} color="green">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    </HeaderBtn>
-                                </div>
-                            </div>
-                        </div>
-                        <BigScoreCard score={myScore} />
+                    {/* LEFT BUTTONS */}
+                    <div className="flex gap-1 pr-2">
+                        <HeaderBtn onClick={onExit} color="neutral">
+                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        </HeaderBtn>
+                        <HeaderBtn onClick={onUndo} disabled={!canUndo} color="neutral">
+                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                        </HeaderBtn>
                     </div>
 
-                    {/* CENTER: Set Info */}
-                    <div className="flex flex-col items-center justify-center shrink-0 px-2">
-                        <span className="text-gray-500 font-bold border border-gray-600 px-2 py-0.5 rounded bg-neutral-900 mb-0.5 text-xs">SET {currentSet}</span>
-                        <div className="flex gap-1 text-gray-400 font-bold text-xs">
-                            <span>{mySetWins}</span>
-                            <span>-</span>
-                            <span>{opSetWins}</span>
+                    {/* CENTER SCOREBOARD */}
+                    <div className="flex items-center justify-center gap-1 min-w-0">
+                         {/* My Name */}
+                         <div className="flex flex-col items-end justify-center min-w-0 flex-1">
+                            <span className={`w-2 h-2 rounded-full mb-1 ${servingTeam === 'me' ? 'bg-accent animate-pulse' : 'bg-transparent'}`}></span>
+                            <span className={`font-black truncate w-full text-right text-lg md:text-3xl leading-none ${servingTeam === 'me' ? 'text-accent' : 'text-gray-300'}`}>
+                                {teamConfig.myName}
+                            </span>
+                         </div>
+                         
+                         {/* My Score */}
+                         <BigScoreCard score={myScore} side="me" />
+                         
+                         {/* Sets Info */}
+                         <div className="flex flex-col items-center justify-center shrink-0 w-[50px] md:w-[60px] gap-1 mx-1">
+                            <span className="text-gray-500 font-bold border border-gray-600 px-1 py-0.5 rounded bg-neutral-900 text-[10px] md:text-xs whitespace-nowrap w-full text-center">SET {currentSet}</span>
+                            <div className="flex items-center justify-center w-full bg-neutral-900 border border-gray-600 rounded h-[24px]">
+                                <span className="text-gray-300 font-bold text-base leading-none">{mySetWins}</span>
+                                <span className="text-gray-500 font-bold text-xs mx-1">-</span>
+                                <span className="text-gray-300 font-bold text-base leading-none">{opSetWins}</span>
+                            </div>
                         </div>
+
+                         {/* Op Score */}
+                         <BigScoreCard score={opScore} side="op" />
+
+                         {/* Op Name */}
+                         <div className="flex flex-col items-start justify-center min-w-0 flex-1">
+                            <span className={`w-2 h-2 rounded-full mb-1 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
+                            <span className={`font-black truncate w-full text-left text-lg md:text-3xl leading-none ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>
+                                {teamConfig.opName}
+                            </span>
+                         </div>
                     </div>
 
-                    {/* RIGHT BLOCK */}
-                    <div className="flex items-center gap-2 h-full py-1">
-                        <BigScoreCard score={opScore} />
-                        <div className="flex flex-col h-full justify-center items-end">
-                            <div className="flex items-center gap-1 pr-1 mb-1">
-                                <span className={`font-black truncate max-w-[120px] text-sm md:text-lg ${servingTeam === 'op' ? 'text-red-500' : 'text-gray-300'}`}>{teamConfig.opName}</span>
-                                <span className={`w-2 h-2 rounded-full shrink-0 ${servingTeam === 'op' ? 'bg-red-500 animate-pulse' : 'bg-transparent'}`}></span>
-                            </div>
-                            <div className="flex items-center gap-1 h-full">
-                                <div className="flex items-center bg-neutral-900 rounded-lg p-0.5 border border-neutral-700 gap-0.5 h-full">
-                                    <HeaderBtn onClick={() => handleScoreAdjust(false, 1)} color="green">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    </HeaderBtn>
-                                    <HeaderBtn onClick={() => handleScoreAdjust(false, -1)} color="red">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
-                                    </HeaderBtn>
-                                </div>
-                                <HeaderBtn onClick={() => handleRotation(false)} color="red">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
-                                </HeaderBtn>
-                                <HeaderBtn onClick={onRedo} disabled={!canRedo}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
-                                </HeaderBtn>
-                            </div>
-                        </div>
+                    {/* RIGHT BUTTONS */}
+                    <div className="flex gap-1 pl-2">
+                        <HeaderBtn onClick={onRedo} disabled={!canRedo} color="neutral">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
+                        </HeaderBtn>
+                         <HeaderBtn onClick={onToggleFullScreen} color="neutral">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                        </HeaderBtn>
                     </div>
+
                 </div>
 
                 {/* COURT AREA - Scales perfectly because parents have strict % and flex-1 */}
@@ -707,11 +757,14 @@ export const GameView: React.FC<GameViewProps> = ({
                         <Court 
                             myLineup={initialMyLineup}
                             opLineup={initialOpLineup}
+                            myRoles={initialMyRoles}
+                            opRoles={initialOpRoles}
                             state={state}
                             activeSide={activeSide}
                             selectedPos={selectedPos}
                             action={selectedAction}
                             onDrawingComplete={handleDrawingComplete}
+                            onRotate={handleRotation}
                         />
                     </div>
                 </div>
@@ -752,9 +805,10 @@ export const GameView: React.FC<GameViewProps> = ({
                 </div>
             </div>
 
-            {/* Modals & Overlays (No Changes) */}
+            {/* Modals & Overlays */}
             {renderActionModal()}
             {renderSubModal()}
+            {renderScoreAdjModal()}
             {showOptions && renderOptionsMenu()}
             {showStats && (
                 <StatsOverlay 

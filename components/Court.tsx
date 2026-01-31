@@ -1,23 +1,36 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Lineup, Position, Coordinate, TeamSide, ActionType } from '../types';
+import { Lineup, Position, Coordinate, TeamSide, ActionType, RoleMapping } from '../types';
 
 interface CourtProps {
   myLineup: Lineup;
   opLineup: Lineup;
+  myRoles: RoleMapping;
+  opRoles: RoleMapping;
   state: 'IDLE' | 'PLAYER_SELECTED' | 'DRAWING' | 'RESULT_PENDING';
   activeSide?: TeamSide;
   selectedPos?: Position | 'L' | null;
   action?: ActionType | null;
   onDrawingComplete: (start: Coordinate, end: Coordinate) => void;
+  onRotate?: (isMyTeam: boolean) => void;
 }
 
 type Point = { x: number, y: number };
 type DragMode = 'start' | 'end' | 'draw_new' | null;
 
+const ROLE_CONFIG: Record<string, { label: string, short: string, color: string, text: string }> = {
+    'S': { label: '舉球', short: '舉', color: '#CA8A04', text: 'white' }, // Yellow-600
+    'OH': { label: '大砲', short: '大', color: '#2563EB', text: 'white' }, // Blue-600
+    'MB': { label: '快攻', short: '快', color: '#16A34A', text: 'white' }, // Green-600
+    'OP': { label: '副攻', short: '副', color: '#DC2626', text: 'white' }, // Red-600
+    'DS': { label: '防守', short: '防', color: '#9333EA', text: 'white' }, // Purple-600
+    'L': { label: '自由', short: '自', color: '#F59E0B', text: 'black' }, // Amber-500
+    '?': { label: '未知', short: '?', color: '#4B5563', text: 'white' }, // Gray-600
+};
+
 export const Court: React.FC<CourtProps> = ({ 
-    myLineup, opLineup, state, activeSide, selectedPos, action,
-    onDrawingComplete
+    myLineup, opLineup, myRoles, opRoles, state, activeSide, selectedPos, action,
+    onDrawingComplete, onRotate
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   
@@ -127,11 +140,6 @@ export const Court: React.FC<CourtProps> = ({
     // Tapping on empty space -> Set End Point
     setDragMode('end'); 
     setEndPos(pt);
-    
-    // Notify parent immediately with NORMALIZED coordinates
-    if (startPos) {
-        onDrawingComplete(normalize(startPos), normalize(pt));
-    }
   };
 
   const handlePointerMove = (e: React.TouchEvent | React.MouseEvent) => {
@@ -143,25 +151,25 @@ export const Court: React.FC<CourtProps> = ({
 
     if (dragMode === 'start') {
         setStartPos(pt);
-        if (endPos) onDrawingComplete(normalize(pt), normalize(endPos));
     } else if (dragMode === 'end' || dragMode === 'draw_new') {
         setEndPos(pt);
-        if (startPos) onDrawingComplete(normalize(startPos), normalize(pt));
     }
   };
 
   const handlePointerUp = () => {
     setDragMode(null);
+    // Notify parent only on release to prevent state thrashing/jumping
+    if (startPos && endPos) {
+        onDrawingComplete(normalize(startPos), normalize(endPos));
+    }
   };
+
+  // Only show watermarks when NOT drawing/selecting path
+  const showWatermarks = state !== 'DRAWING' && state !== 'RESULT_PENDING';
 
   return (
     <div className="w-full h-full relative bg-[#333]">
-        {/* SVG CONTAINER 
-            ViewBox Optimized for Tighter Fit:
-            X: -1 to 19 (Width 20). Court is 0-18. Padding 1 on each side.
-            Y: -0.5 to 9.5 (Height 10). Court is 0-9. Padding 0.5 on top/bottom.
-            Aspect Ratio: 20/10 = 2:1
-        */}
+        {/* SVG CONTAINER */}
         <svg 
             ref={svgRef}
             viewBox="-1 -0.5 20 10" 
@@ -199,24 +207,50 @@ export const Court: React.FC<CourtProps> = ({
             <line x1="6" y1="0" x2="6" y2="9" stroke="white" strokeWidth="0.1" />
             <line x1="12" y1="0" x2="12" y2="9" stroke="white" strokeWidth="0.1" />
 
-            {/* 4. WATERMARKS */}
-            {[1,2,3,4,5,6].map(p => {
+            {/* 4. WATERMARKS - Simple Text, Side by Side, No Color, Hidden during Drawing */}
+            {showWatermarks && [1,2,3,4,5,6].map(p => {
                 const pos = p as Position;
                 const {x, y} = getPositionCenter('me', pos, true);
+                const roleCode = myRoles[pos] || '?';
+                const role = ROLE_CONFIG[roleCode] || ROLE_CONFIG['?'];
+                const num = myLineup[pos];
+
                 return (
-                    <g key={`me-${p}`} className="pointer-events-none opacity-30">
-                        <circle cx={x} cy={y} r="1.2" fill="white" fillOpacity="0.1" />
-                        <text x={x} y={y} dy="0.35" textAnchor="middle" fontSize="1" fill="white" fontWeight="900">{myLineup[pos]}</text>
+                    <g key={`me-${p}`} className="pointer-events-none">
+                        <text 
+                            x={x} y={y + 0.3} 
+                            textAnchor="middle" 
+                            fontSize="0.6" 
+                            fill="white" 
+                            opacity="0.5" 
+                            fontWeight="900"
+                            style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
+                            {num}{role.short}
+                        </text>
                     </g>
                 );
             })}
-            {[1,2,3,4,5,6].map(p => {
+            {showWatermarks && [1,2,3,4,5,6].map(p => {
                 const pos = p as Position;
                 const {x, y} = getPositionCenter('op', pos, true);
+                const roleCode = opRoles[pos] || '?';
+                const role = ROLE_CONFIG[roleCode] || ROLE_CONFIG['?'];
+                const num = opLineup[pos];
+
                 return (
-                    <g key={`op-${p}`} className="pointer-events-none opacity-30">
-                        <circle cx={x} cy={y} r="1.2" fill="white" fillOpacity="0.1" />
-                        <text x={x} y={y} dy="0.35" textAnchor="middle" fontSize="1" fill="white" fontWeight="900">{opLineup[pos]}</text>
+                    <g key={`op-${p}`} className="pointer-events-none">
+                        <text 
+                            x={x} y={y + 0.3} 
+                            textAnchor="middle" 
+                            fontSize="0.6" 
+                            fill="white" 
+                            opacity="0.5" 
+                            fontWeight="900"
+                            style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
+                            {num}{role.short}
+                        </text>
                     </g>
                 );
             })}
@@ -254,6 +288,30 @@ export const Court: React.FC<CourtProps> = ({
             )}
 
         </svg>
+
+        {/* OVERLAY: Rotation Buttons */}
+        
+        {/* My Rotation (Bottom Left - Home Team) */}
+        {onRotate && (
+            <button 
+                onClick={(e) => { e.stopPropagation(); onRotate(true); }}
+                className="absolute bottom-2 left-2 w-10 h-10 bg-accent/60 text-white rounded-full flex items-center justify-center border border-white/30 backdrop-blur active:scale-95 transition-transform"
+                title="Rotate My Team"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            </button>
+        )}
+
+        {/* Op Rotation (Bottom Right - Guest Team) */}
+        {onRotate && (
+            <button 
+                onClick={(e) => { e.stopPropagation(); onRotate(false); }}
+                className="absolute bottom-2 right-2 w-10 h-10 bg-red-600/60 text-white rounded-full flex items-center justify-center border border-white/30 backdrop-blur active:scale-95 transition-transform"
+                title="Rotate Opponent"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            </button>
+        )}
     </div>
   );
 };

@@ -4,6 +4,11 @@ export type Position = 1 | 2 | 3 | 4 | 5 | 6;
 // Maps position number (1-6) to jersey number (string)
 export type Lineup = Record<Position, string>;
 
+export type PlayerRole = 'OH' | 'MB' | 'OP' | 'S' | 'L' | 'DS' | '?';
+
+// Maps position to role
+export type RoleMapping = Record<Position, PlayerRole>;
+
 export interface Coordinate {
   x: number; // 0-100 percentage
   y: number; // 0-100 percentage
@@ -64,6 +69,8 @@ export interface GameState {
   opSetWins: number;  // Added: Sets won by opponent
   myLineup: Lineup;
   opLineup: Lineup;
+  myRoles: RoleMapping; // Added: Roles
+  opRoles: RoleMapping; // Added: Roles
   myLibero: string; // Added Libero
   opLibero: string; // Added Libero
   myScore: number;

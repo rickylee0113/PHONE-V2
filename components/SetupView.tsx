@@ -1,27 +1,47 @@
 
 import React, { useState, useEffect } from 'react';
-import { Lineup, TeamConfig, Position, TeamSide } from '../types';
+import { Lineup, TeamConfig, Position, TeamSide, PlayerRole, RoleMapping } from '../types';
 
 interface SetupViewProps {
   initialConfig?: TeamConfig;
   initialMyLineup?: Lineup;
   initialOpLineup?: Lineup;
+  initialMyRoles?: RoleMapping;
+  initialOpRoles?: RoleMapping;
   initialMyLibero?: string;
   initialOpLibero?: string;
-  onStart: (config: TeamConfig, myLineup: Lineup, opLineup: Lineup, myLibero: string, opLibero: string, firstServe: TeamSide) => void;
+  onStart: (config: TeamConfig, myLineup: Lineup, opLineup: Lineup, myRoles: RoleMapping, opRoles: RoleMapping, myLibero: string, opLibero: string, firstServe: TeamSide) => void;
   onInstallApp?: () => void;
   onToggleFullScreen?: () => void;
+  isGameActive: boolean;
+  onResume: () => void;
+  onNewMatch: () => void;
 }
+
+const ROLES: {code: PlayerRole, label: string, short: string, color: string, textColor: string}[] = [
+    { code: 'S', label: '舉球', short: '舉', color: 'bg-yellow-600', textColor: 'text-white' },
+    { code: 'OH', label: '大砲', short: '大', color: 'bg-blue-600', textColor: 'text-white' },
+    { code: 'MB', label: '快攻', short: '快', color: 'bg-emerald-600', textColor: 'text-white' },
+    { code: 'OP', label: '副攻', short: '副', color: 'bg-red-600', textColor: 'text-white' },
+    { code: 'DS', label: '防守', short: '防', color: 'bg-purple-600', textColor: 'text-white' },
+    { code: 'L', label: '自由', short: '自', color: 'bg-orange-500', textColor: 'text-black' },
+    { code: '?', label: '未知', short: '?', color: 'bg-gray-600', textColor: 'text-white' },
+];
 
 export const SetupView: React.FC<SetupViewProps> = ({ 
   initialConfig, 
   initialMyLineup, 
   initialOpLineup, 
+  initialMyRoles,
+  initialOpRoles,
   initialMyLibero,
   initialOpLibero,
   onStart,
   onInstallApp,
-  onToggleFullScreen
+  onToggleFullScreen,
+  isGameActive,
+  onResume,
+  onNewMatch
 }) => {
   const [matchName, setMatchName] = useState(initialConfig?.matchName || '');
   const [myName, setMyName] = useState(initialConfig?.myName || ''); 
@@ -29,15 +49,32 @@ export const SetupView: React.FC<SetupViewProps> = ({
   const [firstServe, setFirstServe] = useState<TeamSide>('me');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  const [myLineup, setMyLineup] = useState<Lineup>(initialMyLineup || {
-    4: '', 3: '', 2: '', 5: '', 6: '', 1: ''
-  });
-  const [opLineup, setOpLineup] = useState<Lineup>(initialOpLineup || {
-    4: '', 3: '', 2: '', 5: '', 6: '', 1: ''
-  });
+  const [myLineup, setMyLineup] = useState<Lineup>(initialMyLineup || { 4: '', 3: '', 2: '', 5: '', 6: '', 1: '' });
+  const [opLineup, setOpLineup] = useState<Lineup>(initialOpLineup || { 4: '', 3: '', 2: '', 5: '', 6: '', 1: '' });
   
+  const [myRoles, setMyRoles] = useState<RoleMapping>(initialMyRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+  const [opRoles, setOpRoles] = useState<RoleMapping>(initialOpRoles || { 1: '?', 2: '?', 3: '?', 4: '?', 5: '?', 6: '?' });
+
   const [myLibero, setMyLibero] = useState(initialMyLibero || '');
   const [opLibero, setOpLibero] = useState(initialOpLibero || '');
+
+  // Role Selector State
+  const [showRoleSelector, setShowRoleSelector] = useState<{isMyTeam: boolean, pos: number} | null>(null);
+
+  useEffect(() => {
+    // Sync state if props change (e.g. active game state passed back)
+    if (initialConfig) {
+        setMatchName(initialConfig.matchName);
+        setMyName(initialConfig.myName);
+        setOpName(initialConfig.opName);
+    }
+    if (initialMyLineup) setMyLineup(initialMyLineup);
+    if (initialOpLineup) setOpLineup(initialOpLineup);
+    if (initialMyRoles) setMyRoles(initialMyRoles);
+    if (initialOpRoles) setOpRoles(initialOpRoles);
+    if (initialMyLibero) setMyLibero(initialMyLibero);
+    if (initialOpLibero) setOpLibero(initialOpLibero);
+  }, [initialConfig, initialMyLineup, initialOpLineup, initialMyRoles, initialOpRoles, initialMyLibero, initialOpLibero]);
 
   const sanitizeInput = (value: string) => {
       let numericValue = value.replace(/[^0-9]/g, '');
@@ -50,12 +87,24 @@ export const SetupView: React.FC<SetupViewProps> = ({
     const val = sanitizeInput(value);
     if (val === null) return;
 
-    // Use type assertion (as Position) to satisfy strict TypeScript checks
     if (isMyTeam) {
       setMyLineup(prev => ({ ...prev, [parseInt(pos) as Position]: val }));
     } else {
       setOpLineup(prev => ({ ...prev, [parseInt(pos) as Position]: val }));
     }
+  };
+  
+  const handleRoleSelect = (role: PlayerRole) => {
+      if (!showRoleSelector) return;
+      const { isMyTeam, pos } = showRoleSelector;
+      const position = pos as Position;
+      
+      if (isMyTeam) {
+          setMyRoles(prev => ({ ...prev, [position]: role }));
+      } else {
+          setOpRoles(prev => ({ ...prev, [position]: role }));
+      }
+      setShowRoleSelector(null);
   };
 
   const handleLiberoChange = (isMyTeam: boolean, value: string) => {
@@ -65,13 +114,15 @@ export const SetupView: React.FC<SetupViewProps> = ({
       else setOpLibero(val);
   }
 
-  // --- DEBUG / TEST FILL ---
   const handleTestFill = () => {
     setMatchName('練習賽 G1');
     setMyName('主場隊伍');
     setOpName('客場隊伍');
     setMyLineup({ 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6' });
     setOpLineup({ 1: '11', 2: '12', 3: '13', 4: '14', 5: '15', 6: '16' });
+    // Default roles
+    setMyRoles({ 1: 'S', 2: 'OH', 3: 'MB', 4: 'OP', 5: 'OH', 6: 'MB' });
+    setOpRoles({ 1: 'OH', 2: 'MB', 3: 'OP', 4: 'S', 5: 'MB', 6: 'OH' });
     setMyLibero('99');
     setOpLibero('88');
   };
@@ -88,13 +139,9 @@ export const SetupView: React.FC<SetupViewProps> = ({
   };
 
   const hasEmptyFields = (lineup: Lineup) => {
-    // Libero can technically be empty if they don't have one, but for this app flow let's say optional?
-    // User requested "7 players", so let's check lineup strictly, Libero strictly? 
-    // Usually standard app allows empty, but for safety lets warn if main 6 empty.
     return Object.values(lineup).some(val => val.trim() === '');
   };
 
-  // Check for duplicates and empty fields whenever lineups change
   useEffect(() => {
     const myDups = getDuplicates(myLineup, myLibero);
     const opDups = getDuplicates(opLineup, opLibero);
@@ -119,30 +166,51 @@ export const SetupView: React.FC<SetupViewProps> = ({
     const finalOpName = opName.trim() || '對手球隊';
     
     if (errorMsg) return;
-    onStart({ matchName, myName: finalMyName, opName: finalOpName }, myLineup, opLineup, myLibero, opLibero, firstServe);
+    onStart({ matchName, myName: finalMyName, opName: finalOpName }, myLineup, opLineup, myRoles, opRoles, myLibero, opLibero, firstServe);
+  };
+  
+  const handleConfirmNewMatch = () => {
+      if (window.confirm("確定要結束當前比賽並開始新比賽嗎？所有未儲存的紀錄將會遺失。")) {
+          onNewMatch();
+      }
   };
 
-  const renderInput = (isMyTeam: boolean, pos: number) => (
+  const renderInput = (isMyTeam: boolean, pos: number) => {
+    const currentRoles = isMyTeam ? myRoles : opRoles;
+    const role = currentRoles[pos as Position] || '?';
+    const roleConfig = ROLES.find(r => r.code === role) || ROLES[ROLES.length - 1];
+
+    return (
     <div key={pos} className="flex flex-col items-center">
-        <input
-            type="tel"
-            pattern="[0-9]*"
-            inputMode="numeric"
-            placeholder={`P${pos}`}
-            value={isMyTeam ? myLineup[pos as Position] : opLineup[pos as Position]}
-            onChange={(e) => handlePlayerChange(isMyTeam, pos.toString(), e.target.value)}
-            className={`w-full text-center border rounded-lg p-2 text-white focus:border-accent focus:outline-none text-xl font-bold placeholder-gray-600
-            ${isMyTeam ? 'bg-neutral-800 border-neutral-600' : 'bg-red-900/20 border-red-900/50'}`}
-        />
+        <div className="relative w-full">
+            <input
+                type="tel"
+                pattern="[0-9]*"
+                inputMode="numeric"
+                placeholder={`P${pos}`}
+                value={isMyTeam ? myLineup[pos as Position] : opLineup[pos as Position]}
+                onChange={(e) => handlePlayerChange(isMyTeam, pos.toString(), e.target.value)}
+                className={`w-full text-center border rounded-lg p-2 text-white focus:border-accent focus:outline-none text-xl font-bold placeholder-gray-600
+                ${isMyTeam ? 'bg-neutral-800 border-neutral-600' : 'bg-red-900/20 border-red-900/50'}`}
+            />
+            {/* Role Button Absolute */}
+            <button 
+                onClick={() => setShowRoleSelector({isMyTeam, pos})}
+                className={`absolute -right-2 -top-2 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shadow-md border border-white/20 hover:scale-110 transition-transform ${roleConfig.color} ${roleConfig.textColor}`}
+            >
+                {roleConfig.short}
+            </button>
+        </div>
         <span className="text-[10px] text-gray-500 mt-1">pos {pos}</span>
     </div>
-  );
+    );
+  };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-neutral-950">
+    <div className="flex-1 flex flex-col h-full bg-neutral-950 relative">
       
       {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto pb-32 pt-[env(safe-area-inset-top)]">
+      <div className="flex-1 overflow-y-auto pb-40 pt-[env(safe-area-inset-top)]">
         
         <div className="p-4 border-b border-neutral-800 space-y-3 relative">
              <div className="flex items-center justify-between">
@@ -198,13 +266,13 @@ export const SetupView: React.FC<SetupViewProps> = ({
           
           <div className="bg-neutral-900 p-2 rounded-xl border border-neutral-800/50">
              <div className="text-[10px] text-gray-500 text-center mb-1 font-bold">後排 (Back)</div>
-             <div className="grid grid-cols-3 gap-2">
+             <div className="grid grid-cols-3 gap-4 px-2">
                  {[1, 6, 5].map(pos => renderInput(false, pos))}
              </div>
              
              <div className="my-2"></div>
              
-             <div className="grid grid-cols-3 gap-2">
+             <div className="grid grid-cols-3 gap-4 px-2">
                  {[2, 3, 4].map(pos => renderInput(false, pos))}
              </div>
              <div className="text-[10px] text-red-500 text-center mt-1 font-bold">前排 (Front / Net)</div>
@@ -235,13 +303,13 @@ export const SetupView: React.FC<SetupViewProps> = ({
         <section className="p-4 bg-neutral-900/50">
           <div className="bg-neutral-900 p-2 rounded-xl border border-neutral-800/50">
              <div className="text-[10px] text-accent text-center mb-1 font-bold">前排 (Front / Net)</div>
-             <div className="grid grid-cols-3 gap-2">
+             <div className="grid grid-cols-3 gap-4 px-2">
                  {[4, 3, 2].map(pos => renderInput(true, pos))}
              </div>
              
              <div className="my-2"></div>
              
-             <div className="grid grid-cols-3 gap-2">
+             <div className="grid grid-cols-3 gap-4 px-2">
                  {[5, 6, 1].map(pos => renderInput(true, pos))}
              </div>
              <div className="text-[10px] text-gray-500 text-center mt-1 font-bold">後排 (Back)</div>
@@ -272,7 +340,7 @@ export const SetupView: React.FC<SetupViewProps> = ({
         </section>
 
         {/* First Serve Selection */}
-        <section className="px-4 py-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <section className="px-4 py-2 pb-4">
              <h3 className="text-sm text-gray-400 font-bold mb-2 text-center uppercase tracking-wider">先發球權</h3>
              <div className="grid grid-cols-2 gap-4">
                  <button
@@ -301,7 +369,7 @@ export const SetupView: React.FC<SetupViewProps> = ({
       </div>
 
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-900 border-t border-neutral-800 flex flex-col items-center z-50 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-neutral-900 border-t border-neutral-800 flex flex-col items-center z-50 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         {errorMsg && (
           <div className="w-full mb-3 bg-red-900/80 backdrop-blur border border-red-500 text-white px-4 py-3 rounded-lg text-sm text-center font-bold animate-pulse shadow-lg flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -310,18 +378,58 @@ export const SetupView: React.FC<SetupViewProps> = ({
             {errorMsg}
           </div>
         )}
-        <button 
-          onClick={startGame}
-          disabled={!!errorMsg}
-          className={`w-full max-w-[400px] font-bold py-4 rounded-xl text-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2
-            ${errorMsg 
-              ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700' 
-              : 'bg-accent hover:bg-blue-600 text-white shadow-blue-900/50'
-            }`}
-        >
-          開始比賽
-        </button>
+        
+        {isGameActive ? (
+            <div className="w-full max-w-[400px] flex gap-2">
+                <button 
+                  onClick={handleConfirmNewMatch}
+                  className="flex-1 bg-neutral-700 text-gray-300 font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95 text-sm"
+                >
+                  結束並新比賽
+                </button>
+                <button 
+                  onClick={onResume}
+                  className="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95 text-xl"
+                >
+                  繼續比賽
+                </button>
+            </div>
+        ) : (
+            <button 
+              onClick={startGame}
+              disabled={!!errorMsg}
+              className={`w-full max-w-[400px] font-bold py-4 rounded-xl text-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2
+                ${errorMsg 
+                  ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700' 
+                  : 'bg-accent hover:bg-blue-600 text-white shadow-blue-900/50'
+                }`}
+            >
+              開始比賽
+            </button>
+        )}
       </div>
+
+      {/* Role Selection Modal */}
+      {showRoleSelector && (
+          <div className="absolute inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onClick={() => setShowRoleSelector(null)}>
+              <div className="bg-neutral-800 rounded-2xl p-6 w-full max-w-sm border border-neutral-700 shadow-2xl transform transition-all scale-100" onClick={e => e.stopPropagation()}>
+                  <h3 className="text-center text-white font-bold text-xl mb-6">選擇球員角色</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                      {ROLES.map(role => (
+                          <button
+                            key={role.code}
+                            onClick={() => handleRoleSelect(role.code)}
+                            className={`${role.color} ${role.textColor} py-4 rounded-xl font-bold shadow-lg hover:brightness-110 active:scale-95 flex flex-col items-center justify-center gap-1`}
+                          >
+                              <span className="text-3xl mb-1">{role.short}</span>
+                              <span className="text-xs opacity-80">{role.label}</span>
+                          </button>
+                      ))}
+                  </div>
+                  <button onClick={() => setShowRoleSelector(null)} className="w-full mt-6 py-3 bg-neutral-700 text-gray-300 rounded-lg font-bold">取消</button>
+              </div>
+          </div>
+      )}
     </div>
   );
 };
